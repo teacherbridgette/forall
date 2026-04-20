@@ -3,137 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wynn's Teacher Portal</title>
+    <title>Wynn's Auto-Recorder</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        :root { --p: #4834d4; --s: #686de0; --bg: #f0f2f5; --txt: #2f3542; --done: #6ab04c; }
-        body { font-family: 'Fredoka', "Comic Sans MS", cursive; background: var(--bg); margin: 0; text-transform: lowercase; }
+        :root { --p: #4834d4; --s: #686de0; --bg: #f0f2f5; --txt: #2f3542; --done: #6ab04c; --err: #eb4d4b; }
+        body { font-family: 'Fredoka', "Comic Sans MS", cursive; background: var(--bg); margin: 0; text-transform: lowercase; color: var(--txt); }
         
-        /* Layout */
-        .app { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .view { width: 90%; height: 85%; background: white; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); display: none; flex-direction: column; position: relative; overflow: hidden; border: 8px solid var(--p); }
+        .app { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .view { width: 92%; height: 88%; background: white; border-radius: 35px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); display: none; flex-direction: column; position: relative; overflow: hidden; border: 8px solid var(--p); }
         
         /* Lobby */
         #lobby { display: flex; align-items: center; justify-content: center; gap: 30px; }
-        .grade-pill { background: var(--p); color: white; border: none; padding: 50px 70px; border-radius: 30px; font-size: 4vw; cursor: pointer; box-shadow: 0 10px 0 #2f24a3; transition: 0.2s; font-family: inherit; }
-        .grade-pill:active { transform: translateY(5px); box-shadow: 0 5px 0 #2f24a3; }
+        .grade-pill { background: var(--p); color: white; border: none; padding: 45px 65px; border-radius: 25px; font-size: 3.5vw; cursor: pointer; box-shadow: 0 8px 0 #2f24a3; transition: 0.1s; font-family: inherit; font-weight: 700; }
+        .grade-pill:active { transform: translateY(4px); box-shadow: 0 4px 0 #2f24a3; }
 
-        /* Header */
-        .header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; }
-        .btn-icon { background: #f1f2f6; border: none; padding: 12px; border-radius: 15px; cursor: pointer; }
-        
-        /* Settings Overlay (The Drive Link Area) */
-        #settingsPanel { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.98); z-index: 100; padding: 50px; flex-direction: column; align-items: center; }
-        .input-group { width: 80%; margin-bottom: 25px; }
-        .input-group label { display: block; font-weight: 600; margin-bottom: 10px; color: var(--p); font-size: 1.5vw; }
-        .input-field { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #ddd; font-family: inherit; font-size: 1.2vw; }
+        /* Interface */
+        .header { padding: 20px 35px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; background: #fff; }
+        .grid { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; padding: 25px; overflow-y: auto; background: #fafafa; }
+        .seat { background: white; border: 3px solid #eee; border-radius: 20px; font-size: 2.2vw; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; min-height: 90px; box-shadow: 0 4px 0 #eee; transition: 0.2s; }
+        .seat.done { background: var(--done); color: white; border-color: var(--done); box-shadow: 0 4px 0 #27ae60; }
 
-        /* Grid */
-        .grid { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; padding: 30px; overflow-y: auto; }
-        .seat { background: #f8f9fa; border: 3px solid #eee; border-radius: 20px; font-size: 2.5vw; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .seat.done { background: var(--done); color: white; border-color: var(--done); }
+        /* Auto-Setup Panel */
+        #settingsPanel { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.98); z-index: 100; padding: 50px; flex-direction: column; align-items: center; justify-content: center; }
+        .input-box { width: 85%; margin-bottom: 25px; }
+        .input-box label { font-weight: 700; color: var(--p); display: block; margin-bottom: 12px; font-size: 1.4vw; }
+        .input-field { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #ddd; font-family: inherit; font-size: 1.2vw; box-sizing: border-box; }
 
-        /* Modal */
-        #recOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; }
-        .modal { background: white; width: 60%; padding: 40px; border-radius: 40px; text-align: center; }
-        .word-box { font-size: 4vw; color: #eb4d4b; margin: 30px 0; font-weight: 600; min-height: 100px; }
-        .btn-rec { width: 100%; padding: 20px; border-radius: 50px; border: none; font-size: 2vw; color: white; cursor: pointer; font-family: inherit; font-weight: 700; }
+        /* Recording Modal */
+        #recOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal { background: white; width: 70%; padding: 50px; border-radius: 45px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+        .word-display { font-size: 4vw; color: var(--err); margin: 30px 0; font-weight: 700; line-height: 1.2; min-height: 100px; display: flex; align-items: center; justify-content: center; }
+        .btn-action { width: 100%; padding: 20px; border-radius: 50px; border: none; font-size: 2.2vw; color: white; cursor: pointer; font-family: inherit; font-weight: 700; transition: 0.2s; }
     </style>
 </head>
 <body>
 
     <div class="app">
         <div id="lobby" class="view" style="display: flex;">
-            <h1 style="position:absolute; top:40px; color:var(--p); font-size:3vw;">select a grade to start</h1>
-            <button class="grade-pill" onclick="goGrade(3)">grade 3</button>
-            <button class="grade-pill" onclick="goGrade(4)">grade 4</button>
-            <button class="grade-pill" onclick="goGrade(5)">grade 5</button>
+            <h1 style="position:absolute; top:40px; color:var(--p); font-size:3vw;">Teacher Wynn's Recording Lobby</h1>
+            <button class="grade-pill" onclick="startClass(3)">grade 3</button>
+            <button class="grade-pill" onclick="startClass(4)">grade 4</button>
+            <button class="grade-pill" onclick="startClass(5)">grade 5</button>
         </div>
 
-        <div id="classroom" class="view">
+        <div id="main" class="view">
             <div class="header">
-                <button class="btn-icon" onclick="location.reload()"><i data-lucide="home"></i></button>
+                <button onclick="location.reload()" style="border:none; background:none; cursor:pointer;"><i data-lucide="home" size="32"></i></button>
                 <div style="display:flex; gap:20px; align-items:center;">
-                    <h2 id="gradeTitle" style="color:var(--p); margin:0;">grade 5</h2>
+                    <h2 id="titleText" style="color:var(--p); margin:0; font-size:2vw;">grade 5</h2>
                     <select id="classSel" class="input-field" style="width:auto; padding:5px 15px;"></select>
-                    <select id="modeSel" class="input-field" style="width:auto; padding:5px 15px;">
+                    <select id="taskSel" class="input-field" style="width:auto; padding:5px 15px;">
                         <option value="1">1 sentence</option>
-                        <option value="all">read all</option>
+                        <option value="all">read all sentences</option>
                     </select>
                 </div>
-                <button class="btn-icon" onclick="toggleSettings(true)"><i data-lucide="settings"></i></button>
+                <button onclick="toggleSettings(true)" style="border:none; background:none; cursor:pointer;"><i data-lucide="settings" size="32"></i></button>
             </div>
 
             <div class="grid" id="seatGrid"></div>
 
             <div id="settingsPanel">
-                <h2 style="color:var(--p);">Teacher setup for <span id="setupGrade"></span></h2>
+                <h1 style="color:var(--p); margin-bottom:40px;">Automatic Teacher Setup (<span id="setupLabel"></span>)</h1>
                 
-                <div class="input-group">
-                    <label>1. paste google drive folder link here:</label>
-                    <input type="text" id="driveInput" class="input-field" placeholder="https://drive.google.com/drive/folders/...">
+                <div class="input-box">
+                    <label>1. paste your google drive folder link:</label>
+                    <input type="text" id="driveLinkInput" class="input-field" placeholder="Paste the link from your browser address bar here...">
+                    <small style="color:#777; margin-top:5px; display:block;">The app will automatically find your ID.</small>
                 </div>
 
-                <div class="input-group">
-                    <label>2. upload vocabulary (excel/word/text):</label>
+                <div class="input-box">
+                    <label>2. upload your word/excel list:</label>
                     <input type="file" id="fileInput" class="input-field">
                 </div>
 
-                <button class="grade-pill" style="font-size:1.5vw; padding:20px 40px;" onclick="toggleSettings(false)">save & start class</button>
+                <button class="grade-pill" style="font-size:1.8vw; width:50%; margin-top:30px;" onclick="toggleSettings(false)">Save Settings & Start</button>
             </div>
         </div>
     </div>
 
     <div id="recOverlay">
         <div class="modal">
-            <div id="wordBox" class="word-box">loading...</div>
-            <button id="startBtn" class="btn-rec" style="background:var(--done);" onclick="startRec()">start recording</button>
-            <button id="stopBtn" class="btn-rec" style="background:#eb4d4b; display:none;" onclick="stopRec()">stop & save</button>
-            <button onclick="closeModal()" style="background:none; border:none; margin-top:20px; cursor:pointer; color:#95a5a6;">cancel</button>
-            <div id="status" style="margin-top:10px; font-weight:600; color:var(--p);">ready</div>
+            <div id="wordBox" class="word-display">loading...</div>
+            <button id="startBtn" class="btn-action" style="background:var(--done);" onclick="startRec()">Start Recording</button>
+            <button id="stopBtn" class="btn-action" style="background:var(--err); display:none;" onclick="stopRec()">End & Save to Drive</button>
+            <div id="status" style="margin-top:20px; font-weight:700; color:var(--p); font-size:1.2vw;">Ready to record</div>
+            <button onclick="closeRec()" style="background:none; border:none; margin-top:25px; color:#aaa; cursor:pointer; font-size:1.2vw;">cancel</button>
         </div>
     </div>
 
     <script>
-        const webAppURL = 'https://script.google.com/macros/s/AKfycbxnJXyRbXOGolp7DKXxpcfNCPQdbCf2WkrXF88-PQi15K7Adm40TMhdHEmutJCtUTr4/exec';
+        // YOUR UPDATED WEB APP URL
+        const webAppURL = 'https://script.google.com/macros/s/AKfycbyeaSmQd4QSv6OvN_v85YNKx8gpMuKCugyVXRzX8t3iECll0f6fn4GMKmXCtGI1fIr4/exec';
+        
         let vocab = { "3":[], "4":[], "5":[] };
-        let activeGrade, recorder, chunks = [], currentSeat, currentEl;
+        let activeG, mediaRec, audioChunks = [], curNum, curBtn;
 
         lucide.createIcons();
 
-        function goGrade(g) {
-            activeGrade = g;
+        function startClass(g) {
+            activeG = g;
             document.getElementById('lobby').style.display = 'none';
-            document.getElementById('classroom').style.display = 'flex';
-            document.getElementById('gradeTitle').innerText = "grade " + g;
-            document.getElementById('setupGrade').innerText = "grade " + g;
+            document.getElementById('main').style.display = 'flex';
+            document.getElementById('titleText').innerText = "Grade " + g;
+            document.getElementById('setupLabel').innerText = "Grade " + g;
             
-            // Auto-populate classes
-            const sel = document.getElementById('classSel');
-            sel.innerHTML = '';
-            [1,2,3,4].forEach(n => { let o = document.createElement('option'); o.value = g+"0"+n; o.innerText = g+"0"+n; sel.appendChild(o); });
+            const classSel = document.getElementById('classSel');
+            classSel.innerHTML = '';
+            [1,2,3,4,5].forEach(n => { let o = document.createElement('option'); o.value = g+"0"+n; o.innerText = g+"0"+n; classSel.appendChild(o); });
             
-            buildGrid();
-        }
-
-        function toggleSettings(show) {
-            document.getElementById('settingsPanel').style.display = show ? 'flex' : 'none';
-        }
-
-        function buildGrid() {
             const grid = document.getElementById('seatGrid');
             grid.innerHTML = '';
-            for(let i=1; i<=25; i++) {
+            for(let i=1; i<=30; i++) {
                 let s = document.createElement('div'); s.className = 'seat'; s.innerText = i;
                 s.onclick = () => openRec(i, s);
                 grid.appendChild(s);
             }
         }
 
-        // Handle File Uploads
+        function toggleSettings(visible) { document.getElementById('settingsPanel').style.display = visible ? 'flex' : 'none'; }
+
+        // AUTOMATIC FILE READING
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             const reader = new FileReader();
@@ -145,63 +137,73 @@
                 } else {
                     list = evt.target.result.split(/\n/).map(s => s.trim());
                 }
-                vocab[activeGrade] = list.filter(s => s.length > 0);
-                alert("successfully loaded " + vocab[activeGrade].length + " items for grade " + activeGrade);
+                vocab[activeG] = list.filter(s => s && s.length > 0);
+                alert("Success! " + vocab[activeG].length + " sentences loaded.");
             };
             if(file.name.match(/\.xls/)) reader.readAsBinaryString(file); else reader.readAsText(file);
         });
 
-        function openRec(num, el) {
-            currentSeat = num; currentEl = el;
-            const list = vocab[activeGrade];
-            const mode = document.getElementById('modeSel').value;
-            
-            if(list.length === 0) { document.getElementById('wordBox').innerText = "no words uploaded!"; }
-            else if(mode === 'all') { document.getElementById('wordBox').innerText = list.join(" | "); }
-            else { document.getElementById('wordBox').innerText = list[(num-1) % list.length]; }
-
+        function openRec(num, btn) {
+            curNum = num; curBtn = btn;
+            const list = vocab[activeG];
+            const task = document.getElementById('taskSel').value;
+            if(list.length === 0) {
+                document.getElementById('wordBox').innerText = "Teacher: Please upload word list in settings!";
+            } else {
+                document.getElementById('wordBox').innerText = (task === 'all') ? list.join(" | ") : list[(num-1) % list.length];
+            }
             document.getElementById('recOverlay').style.display = 'flex';
         }
 
         async function startRec() {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            recorder = new MediaRecorder(stream);
-            chunks = [];
-            recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = upload;
-            recorder.start();
-            document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('stopBtn').style.display = 'block';
-            document.getElementById('status').innerText = "recording...";
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRec = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRec.ondataavailable = e => audioChunks.push(e.data);
+                mediaRec.onstop = processUpload;
+                mediaRec.start();
+                document.getElementById('startBtn').style.display = 'none';
+                document.getElementById('stopBtn').style.display = 'block';
+                document.getElementById('status').innerText = "🔴 Recording Now...";
+            } catch (err) { alert("Mic Error: Please allow microphone access."); }
         }
 
-        function stopRec() { recorder.stop(); document.getElementById('status').innerText = "uploading..."; }
+        function stopRec() { 
+            mediaRec.stop(); 
+            document.getElementById('status').innerText = "⏳ Saving to Teacher's Drive..."; 
+        }
 
-        function upload() {
+        function processUpload() {
             const reader = new FileReader();
-            reader.readAsDataURL(new Blob(chunks));
+            reader.readAsDataURL(new Blob(audioChunks));
             reader.onloadend = () => {
-                const link = document.getElementById('driveInput').value;
-                const folderId = (link.match(/[-\w]{25,}/) || ["1jmG41ZA7p3Eu3EICA79DcukHb5thVu_-"])[0];
+                // AUTOMATIC DRIVE LINK EXTRACTION
+                const link = document.getElementById('driveLinkInput').value;
+                const match = link.match(/[-\w]{25,}/); // Automatically finds the ID
+                const extractedId = match ? match[0] : "";
 
-                const fd = new URLSearchParams();
-                fd.append('audio', reader.result.split(',')[1]);
-                fd.append('className', document.getElementById('classSel').value);
-                fd.append('filename', `Seat_${currentSeat}.webm`);
-                fd.append('folderId', folderId);
+                const params = new URLSearchParams();
+                params.append('audio', reader.result.split(',')[1]);
+                params.append('className', document.getElementById('classSelect').value || document.getElementById('classSel').value);
+                params.append('filename', `Seat${curNum}_Grade${activeG}.webm`);
+                params.append('folderId', extractedId); // Directly sends extracted ID
 
-                fetch(webAppURL, { method: 'POST', body: fd, mode: 'no-cors' }).then(() => {
-                    currentEl.classList.add('done');
-                    closeModal();
+                fetch(webAppURL, { method: 'POST', body: params, mode: 'no-cors' }).then(() => {
+                    curBtn.classList.add('done');
+                    curBtn.innerText = curNum + " ✓";
+                    closeRec();
+                }).catch(err => {
+                    document.getElementById('status').innerText = "Error: Check Drive Link!";
                 });
             };
         }
 
-        function closeModal() { 
+        function closeRec() { 
             document.getElementById('recOverlay').style.display = 'none'; 
             document.getElementById('startBtn').style.display = 'block';
             document.getElementById('stopBtn').style.display = 'none';
-            document.getElementById('status').innerText = "ready";
+            document.getElementById('status').innerText = "Ready to record";
         }
     </script>
 </body>
