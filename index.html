@@ -3,211 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wynn's Recording Studio</title>
+    <title>Wynn's Teacher Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        :root { 
-            --bg: #f0f2f5; --panel: #ffffff; --primary: #4834d4; 
-            --secondary: #686de0; --accent: #eb4d4b; --success: #6ab04c; --text: #2f3542;
-        }
-        body { 
-            font-family: 'Fredoka', cursive, sans-serif; background-color: var(--bg); 
-            margin: 0; display: flex; justify-content: center; align-items: center; 
-            height: 100vh; overflow: hidden; color: var(--text);
-        }
-        .app-container { 
-            width: 95vw; height: 90vh; background: var(--panel); border-radius: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1); display: flex; flex-direction: column;
-            overflow: hidden; border: 1px solid rgba(255,255,255,0.3);
-        }
+        :root { --p: #4834d4; --s: #686de0; --bg: #f0f2f5; --txt: #2f3542; --done: #6ab04c; }
+        body { font-family: 'Fredoka', "Comic Sans MS", cursive; background: var(--bg); margin: 0; text-transform: lowercase; }
         
-        #lobbyView { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; }
-        .hero-title { font-size: 4vw; color: var(--primary); margin: 0; text-transform: lowercase; }
-        .grade-container { display: flex; gap: 20px; }
-        .grade-card { 
-            background: var(--primary); color: white; padding: 40px 60px; border-radius: 25px;
-            font-size: 3vw; cursor: pointer; transition: 0.3s; border: none; font-family: inherit;
-            box-shadow: 0 10px 0 #2f24a3;
-        }
+        /* Layout */
+        .app { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .view { width: 90%; height: 85%; background: white; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); display: none; flex-direction: column; position: relative; overflow: hidden; border: 8px solid var(--p); }
         
-        #gradeView { display: none; flex-direction: column; height: 100%; }
-        .top-bar { 
-            padding: 20px 40px; background: #fff; border-bottom: 2px solid #eee;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .settings-bar { 
-            display: flex; gap: 15px; align-items: center; background: #f8f9fa; 
-            padding: 10px 25px; border-radius: 20px; font-size: 1.1vw;
-        }
+        /* Lobby */
+        #lobby { display: flex; align-items: center; justify-content: center; gap: 30px; }
+        .grade-pill { background: var(--p); color: white; border: none; padding: 50px 70px; border-radius: 30px; font-size: 4vw; cursor: pointer; box-shadow: 0 10px 0 #2f24a3; transition: 0.2s; font-family: inherit; }
+        .grade-pill:active { transform: translateY(5px); box-shadow: 0 5px 0 #2f24a3; }
 
-        .grid-area { flex: 1; padding: 30px; overflow-y: auto; display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; }
-        .seat-btn { 
-            background: white; border: 2px solid #eee; border-radius: 18px;
-            font-size: 1.8vw; font-weight: 600; cursor: pointer; transition: 0.2s;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
-        }
-        .seat-btn.done { background: var(--success); color: white; border-color: var(--success); }
+        /* Header */
+        .header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; }
+        .btn-icon { background: #f1f2f6; border: none; padding: 12px; border-radius: 15px; cursor: pointer; }
+        
+        /* Settings Overlay (The Drive Link Area) */
+        #settingsPanel { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.98); z-index: 100; padding: 50px; flex-direction: column; align-items: center; }
+        .input-group { width: 80%; margin-bottom: 25px; }
+        .input-group label { display: block; font-weight: 600; margin-bottom: 10px; color: var(--p); font-size: 1.5vw; }
+        .input-field { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #ddd; font-family: inherit; font-size: 1.2vw; }
 
-        /* Setup Panel */
-        #setupOverlay { 
-            display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.95); 
-            z-index: 2000; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
-        }
-        .setup-card { background: white; padding: 40px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 50%; }
-        input[type="text"] { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 2px solid var(--bg); font-family: inherit; }
+        /* Grid */
+        .grid { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; padding: 30px; overflow-y: auto; }
+        .seat { background: #f8f9fa; border: 3px solid #eee; border-radius: 20px; font-size: 2.5vw; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .seat.done { background: var(--done); color: white; border-color: var(--done); }
 
-        #overlay { 
-            display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 1000;
-        }
-        .modal { background: white; width: 70%; padding: 40px; border-radius: 40px; text-align: center; }
-        .mic-btn { width: 100%; padding: 20px; border-radius: 50px; border: none; font-size: 2vw; font-weight: 600; cursor: pointer; color: white; }
+        /* Modal */
+        #recOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; }
+        .modal { background: white; width: 60%; padding: 40px; border-radius: 40px; text-align: center; }
+        .word-box { font-size: 4vw; color: #eb4d4b; margin: 30px 0; font-weight: 600; min-height: 100px; }
+        .btn-rec { width: 100%; padding: 20px; border-radius: 50px; border: none; font-size: 2vw; color: white; cursor: pointer; font-family: inherit; font-weight: 700; }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <div id="lobbyView">
-            <h1 class="hero-title">wynn's recorder</h1>
-            <div class="grade-container">
-                <button class="grade-card" onclick="startSession(3)">grade 3</button>
-                <button class="grade-card" onclick="startSession(4)">grade 4</button>
-                <button class="grade-card" onclick="startSession(5)">grade 5</button>
-            </div>
-            <button class="close-btn" onclick="openSetup()" style="color:var(--primary); text-decoration: underline; background:none; border:none; cursor:pointer;">
-                <i data-lucide="settings"></i> teacher setup (folder & words)
-            </button>
+    <div class="app">
+        <div id="lobby" class="view" style="display: flex;">
+            <h1 style="position:absolute; top:40px; color:var(--p); font-size:3vw;">select a grade to start</h1>
+            <button class="grade-pill" onclick="goGrade(3)">grade 3</button>
+            <button class="grade-pill" onclick="goGrade(4)">grade 4</button>
+            <button class="grade-pill" onclick="goGrade(5)">grade 5</button>
         </div>
 
-        <div id="setupOverlay">
-            <div class="setup-card">
-                <h2>Teacher Configuration</h2>
-                <label>1. Google Drive Folder Link:</label>
-                <input type="text" id="driveLinkInput" placeholder="Paste your Google Drive folder URL here...">
-                
-                <label style="display:block; margin-top:20px;">2. Vocabulary File (Excel/Text):</label>
-                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv, .txt" style="margin-top:10px;">
-                
-                <button class="grade-card" onclick="saveSetup()" style="font-size:1.5vw; padding:15px; width:100%; margin-top:30px;">Save & Close</button>
-            </div>
-        </div>
-
-        <div id="gradeView">
-            <div class="top-bar">
-                <button onclick="location.reload()" style="background:none; border:none; cursor:pointer;"><i data-lucide="chevron-left"></i> back</button>
-                <div class="settings-bar">
-                    <span id="gradeLabel" style="font-weight:700; color:var(--primary);">Grade 5</span>
-                    <select id="classSelect"></select>
-                    <select id="taskMode">
+        <div id="classroom" class="view">
+            <div class="header">
+                <button class="btn-icon" onclick="location.reload()"><i data-lucide="home"></i></button>
+                <div style="display:flex; gap:20px; align-items:center;">
+                    <h2 id="gradeTitle" style="color:var(--p); margin:0;">grade 5</h2>
+                    <select id="classSel" class="input-field" style="width:auto; padding:5px 15px;"></select>
+                    <select id="modeSel" class="input-field" style="width:auto; padding:5px 15px;">
                         <option value="1">1 sentence</option>
                         <option value="all">read all</option>
                     </select>
                 </div>
+                <button class="btn-icon" onclick="toggleSettings(true)"><i data-lucide="settings"></i></button>
             </div>
-            <div class="grid-area" id="grid"></div>
+
+            <div class="grid" id="seatGrid"></div>
+
+            <div id="settingsPanel">
+                <h2 style="color:var(--p);">Teacher setup for <span id="setupGrade"></span></h2>
+                
+                <div class="input-group">
+                    <label>1. paste google drive folder link here:</label>
+                    <input type="text" id="driveInput" class="input-field" placeholder="https://drive.google.com/drive/folders/...">
+                </div>
+
+                <div class="input-group">
+                    <label>2. upload vocabulary (excel/word/text):</label>
+                    <input type="file" id="fileInput" class="input-field">
+                </div>
+
+                <button class="grade-pill" style="font-size:1.5vw; padding:20px 40px;" onclick="toggleSettings(false)">save & start class</button>
+            </div>
         </div>
     </div>
 
-    <div id="overlay">
+    <div id="recOverlay">
         <div class="modal">
-            <div id="wordBox" style="font-size:3vw; color:var(--accent); margin:20px 0;">loading...</div>
-            <button id="startBtn" class="mic-btn" style="background:var(--success)" onclick="handleStart()">start recording</button>
-            <button id="stopBtn" class="mic-btn" style="background:var(--accent); display:none;" onclick="handleStop()">stop & save</button>
-            <div id="status">ready</div>
+            <div id="wordBox" class="word-box">loading...</div>
+            <button id="startBtn" class="btn-rec" style="background:var(--done);" onclick="startRec()">start recording</button>
+            <button id="stopBtn" class="btn-rec" style="background:#eb4d4b; display:none;" onclick="stopRec()">stop & save</button>
+            <button onclick="closeModal()" style="background:none; border:none; margin-top:20px; cursor:pointer; color:#95a5a6;">cancel</button>
+            <div id="status" style="margin-top:10px; font-weight:600; color:var(--p);">ready</div>
         </div>
     </div>
 
     <script>
         const webAppURL = 'https://script.google.com/macros/s/AKfycbxnJXyRbXOGolp7DKXxpcfNCPQdbCf2WkrXF88-PQi15K7Adm40TMhdHEmutJCtUTr4/exec';
-        let vocabData = { "3": [], "4": [], "5": [] };
-        let teacherFolderId = ""; 
-        let activeGrade, recorder, chunks = [];
+        let vocab = { "3":[], "4":[], "5":[] };
+        let activeGrade, recorder, chunks = [], currentSeat, currentEl;
 
         lucide.createIcons();
 
-        function openSetup() { document.getElementById('setupOverlay').style.display = 'flex'; }
-        
-        function saveSetup() {
-            const link = document.getElementById('driveLinkInput').value;
-            // Extract ID from full URL if needed
-            const match = link.match(/[-\w]{25,}/);
-            if(match) {
-                teacherFolderId = match[0];
-                localStorage.setItem('teacherFolderId', teacherFolderId);
-            }
-            document.getElementById('setupOverlay').style.display = 'none';
+        function goGrade(g) {
+            activeGrade = g;
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('classroom').style.display = 'flex';
+            document.getElementById('gradeTitle').innerText = "grade " + g;
+            document.getElementById('setupGrade').innerText = "grade " + g;
+            
+            // Auto-populate classes
+            const sel = document.getElementById('classSel');
+            sel.innerHTML = '';
+            [1,2,3,4].forEach(n => { let o = document.createElement('option'); o.value = g+"0"+n; o.innerText = g+"0"+n; sel.appendChild(o); });
+            
+            buildGrid();
         }
 
-        // Vocabulary File Handler
+        function toggleSettings(show) {
+            document.getElementById('settingsPanel').style.display = show ? 'flex' : 'none';
+        }
+
+        function buildGrid() {
+            const grid = document.getElementById('seatGrid');
+            grid.innerHTML = '';
+            for(let i=1; i<=25; i++) {
+                let s = document.createElement('div'); s.className = 'seat'; s.innerText = i;
+                s.onclick = () => openRec(i, s);
+                grid.appendChild(s);
+            }
+        }
+
+        // Handle File Uploads
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             const reader = new FileReader();
             reader.onload = (evt) => {
-                let list = (file.name.match(/\.xls/)) ? 
-                    XLSX.utils.sheet_to_json(XLSX.read(evt.target.result, {type:'binary'}).Sheets[XLSX.read(evt.target.result, {type:'binary'}).SheetNames[0]], {header:1}).flat() :
-                    evt.target.result.split(/\n/).map(s => s.trim());
-                const g = prompt("Grade (3, 4, 5)?");
-                if(g) vocabData[g] = list.filter(s => s.length > 0);
+                let list = [];
+                if(file.name.match(/\.xls/)) {
+                    const wb = XLSX.read(evt.target.result, {type: 'binary'});
+                    list = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1}).flat();
+                } else {
+                    list = evt.target.result.split(/\n/).map(s => s.trim());
+                }
+                vocab[activeGrade] = list.filter(s => s.length > 0);
+                alert("successfully loaded " + vocab[activeGrade].length + " items for grade " + activeGrade);
             };
             if(file.name.match(/\.xls/)) reader.readAsBinaryString(file); else reader.readAsText(file);
         });
 
-        function startSession(g) {
-            activeGrade = g;
-            document.getElementById('lobbyView').style.display = 'none';
-            document.getElementById('gradeView').style.display = 'flex';
-            const sel = document.getElementById('classSelect');
-            sel.innerHTML = '';
-            [1,2,3].forEach(n => {
-                let opt = document.createElement('option'); opt.value = g+"0"+n; opt.innerText = g+"0"+n; sel.appendChild(opt);
-            });
-            const grid = document.getElementById('grid'); grid.innerHTML = '';
-            for(let i=1; i<=25; i++) {
-                let b = document.createElement('div'); b.className = 'seat-btn'; b.innerText = i;
-                b.onclick = () => {
-                    window.currentSeat = i; window.currentElement = b;
-                    const list = vocabData[activeGrade];
-                    document.getElementById('wordBox').innerText = (document.getElementById('taskMode').value === 'all') ? list.join(" | ") : (list[(i-1)%list.length] || "no words");
-                    document.getElementById('overlay').style.display = 'flex';
-                };
-                grid.appendChild(b);
-            }
+        function openRec(num, el) {
+            currentSeat = num; currentEl = el;
+            const list = vocab[activeGrade];
+            const mode = document.getElementById('modeSel').value;
+            
+            if(list.length === 0) { document.getElementById('wordBox').innerText = "no words uploaded!"; }
+            else if(mode === 'all') { document.getElementById('wordBox').innerText = list.join(" | "); }
+            else { document.getElementById('wordBox').innerText = list[(num-1) % list.length]; }
+
+            document.getElementById('recOverlay').style.display = 'flex';
         }
 
-        async function handleStart() {
+        async function startRec() {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             recorder = new MediaRecorder(stream);
             chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = uploadAudio;
+            recorder.onstop = upload;
             recorder.start();
             document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('stopBtn').style.display = 'flex';
+            document.getElementById('stopBtn').style.display = 'block';
+            document.getElementById('status').innerText = "recording...";
         }
 
-        function handleStop() { recorder.stop(); }
+        function stopRec() { recorder.stop(); document.getElementById('status').innerText = "uploading..."; }
 
-        function uploadAudio() {
+        function upload() {
             const reader = new FileReader();
             reader.readAsDataURL(new Blob(chunks));
             reader.onloadend = () => {
+                const link = document.getElementById('driveInput').value;
+                const folderId = (link.match(/[-\w]{25,}/) || ["1jmG41ZA7p3Eu3EICA79DcukHb5thVu_-"])[0];
+
                 const fd = new URLSearchParams();
                 fd.append('audio', reader.result.split(',')[1]);
-                fd.append('className', document.getElementById('classSelect').value);
-                fd.append('filename', `Seat${window.currentSeat}.webm`);
-                // SEND THE CUSTOM FOLDER ID
-                fd.append('folderId', teacherFolderId || "1jmG41ZA7p3Eu3EICA79DcukHb5thVu_-");
+                fd.append('className', document.getElementById('classSel').value);
+                fd.append('filename', `Seat_${currentSeat}.webm`);
+                fd.append('folderId', folderId);
 
                 fetch(webAppURL, { method: 'POST', body: fd, mode: 'no-cors' }).then(() => {
-                    window.currentElement.classList.add('done');
-                    document.getElementById('overlay').style.display = 'none';
-                    document.getElementById('startBtn').style.display = 'flex';
-                    document.getElementById('stopBtn').style.display = 'none';
+                    currentEl.classList.add('done');
+                    closeModal();
                 });
             };
+        }
+
+        function closeModal() { 
+            document.getElementById('recOverlay').style.display = 'none'; 
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('status').innerText = "ready";
         }
     </script>
 </body>
