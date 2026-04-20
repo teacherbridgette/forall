@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>teacher wynn's recorder</title>
+    <title>Teacher Wynn's Recorder</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     
@@ -44,13 +44,13 @@
     <div class="game-canvas">
         <div class="header-controls">
             <div class="left-controls">
-                <h1>班級:</h1>
+                <h1>class:</h1>
                 <select id="classSelect">
                     <option value="501">501</option><option value="502">502</option><option value="503">503</option>
                     <option value="401">401</option><option value="402">402</option><option value="403">403</option>
                     <option value="301">301</option><option value="302">302</option><option value="303">303</option>
                 </select>
-                <h1>點擊座號錄音</h1>
+                <h1>tap a number to record</h1>
             </div>
             <button class="btn-settings" onclick="openSettings()"><i data-lucide="settings"></i></button>
         </div>
@@ -60,26 +60,25 @@
         <div id="overlay">
             <div class="modal">
                 <div class="word-display" id="wordBox">word</div>
-                <button id="startBtn" class="btn-start" onclick="startRec()"><i data-lucide="mic"></i> 開始錄音</button>
-                <button id="stopBtn" class="btn-stop" onclick="stopRec()"><div class="recording-pulse"></div> 結束並儲存</button>
-                <button class="btn-close" onclick="closeModal()">關閉</button>
-                <div id="status">準備好了</div>
+                <button id="startBtn" class="btn-start" onclick="startRec()"><i data-lucide="mic"></i> start recording</button>
+                <button id="stopBtn" class="btn-stop" onclick="stopRec()"><div class="recording-pulse"></div> end & save</button>
+                <button class="btn-close" onclick="closeModal()">close</button>
+                <div id="status">ready!</div>
             </div>
         </div>
 
         <div id="settingsOverlay">
             <div class="modal" style="border-color: var(--blue);">
-                <h2>設定 (settings)</h2>
-                <p>webapp url:</p>
+                <h2>settings</h2>
+                <p>google script url:</p>
                 <input type="text" id="urlInput" placeholder="https://script.google.com/macros/s/...">
-                <button class="btn-start" onclick="saveSettings()">儲存設定</button>
-                <button class="btn-close" onclick="document.getElementById('settingsOverlay').style.display='none'">取消</button>
+                <button class="btn-start" onclick="saveSettings()">save settings</button>
+                <button class="btn-close" onclick="document.getElementById('settingsOverlay').style.display='none'">cancel</button>
             </div>
         </div>
     </div>
 
     <script>
-        // UPDATED WITH YOUR LATEST URL
         let scriptURL = localStorage.getItem('teacherWynnUrl') || 'https://script.google.com/macros/s/AKfycbxnJXyRbXOGolp7DKXxpcfNCPQdbCf2WkrXF88-PQi15K7Adm40TMhdHEmutJCtUTr4/exec';
 
         const vocabulary = {
@@ -113,7 +112,7 @@
                 curNum = i; curPill = p;
                 document.getElementById('wordBox').innerText = list[Math.floor(Math.random()*list.length)];
                 document.getElementById('overlay').style.display = 'flex';
-                document.getElementById('status').innerText = "準備好了";
+                document.getElementById('status').innerText = "ready to record!";
             };
             document.getElementById('grid').appendChild(p);
         }
@@ -128,11 +127,11 @@
                 recorder.start();
                 document.getElementById('startBtn').style.display = 'none';
                 document.getElementById('stopBtn').style.display = 'flex';
-                document.getElementById('status').innerText = "正在錄音...";
-            } catch (err) { alert("請允許麥克風權限!"); }
+                document.getElementById('status').innerText = "recording now...";
+            } catch (err) { alert("please allow microphone access!"); }
         }
 
-        function stopRec() { recorder.stop(); document.getElementById('status').innerText = "正在儲存..."; }
+        function stopRec() { recorder.stop(); document.getElementById('status').innerText = "saving to drive..."; }
 
         function upload() {
             const blob = new Blob(chunks, { type: 'audio/webm' });
@@ -151,7 +150,7 @@
                     playSuccessSound();
                     curPill.innerText = "✓";
                     curPill.classList.add('completed');
-                    document.getElementById('status').innerText = "儲存成功!";
+                    document.getElementById('status').innerText = "saved successfully!";
                     setTimeout(closeModal, 1200);
                 });
             };
@@ -167,7 +166,7 @@
             localStorage.setItem('teacherWynnUrl', newUrl);
             scriptURL = newUrl;
             document.getElementById('settingsOverlay').style.display = 'none';
-            alert("設定已儲存!");
+            alert("settings saved!");
         }
 
         function closeModal() { document.getElementById('overlay').style.display = 'none'; document.getElementById('startBtn').style.display = 'flex'; document.getElementById('stopBtn').style.display = 'none'; }
