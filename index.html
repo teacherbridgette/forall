@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Teacher Wynn's Advanced Recorder</title>
+    <title>Wynn's Recorder Lobby</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -13,66 +13,90 @@
         body { font-family: 'Fredoka', "Comic Sans MS", cursive, sans-serif; background-color: #1e272e; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; text-transform: lowercase; }
         .game-canvas { width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; background: #ffffff; position: relative; display: flex; flex-direction: column; align-items: center; padding: 2%; box-sizing: border-box; border-radius: 20px; border: 10px solid var(--blue); }
         
-        .header-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; width: 95%; justify-content: space-between; }
-        .setup-group { display: flex; gap: 10px; align-items: center; background: #f1f2f6; padding: 8px 15px; border-radius: 15px; }
+        /* --- lobby (front page) styles --- */
+        #lobbyView, #gradeView { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
+        #gradeView { display: none; } /* Hidden by default */
+
+        .lobby-grid { display: flex; gap: 3vw; height: 60%; width: 90%; justify-content: center; align-items: center; }
+        .grade-pill { font-size: 6vw; padding: 5% 8%; }
+
+        h1 { color: var(--green); margin: 0; font-size: 4vw; font-weight: 700; margin-bottom: 3%; }
+        .setup-row { display: flex; gap: 15px; align-items: center; background: #f1f2f6; padding: 10px 20px; border-radius: 15px; width: 90%; justify-content: space-between; margin-bottom: 2%; }
         
+        /* General Pill Button Styling */
+        .pill-btn { background: var(--blue); border: none; border-radius: 100px; display: flex; justify-content: center; align-items: center; font-weight: 700; cursor: pointer; color: white; box-shadow: 0 0.4vw 0 #054475; transition: 0.1s; text-decoration: none; }
+        .pill-btn:active { transform: translateY(0.2vw); box-shadow: 0 0.2vw 0 #054475; }
+        .pill-btn.completed { background: var(--done) !important; box-shadow: 0 0.4vw 0 #27ae60 !important; pointer-events: none; opacity: 0.7; }
+        .pill-btn.danger { background: var(--grey); box-shadow: 0 0.4vw 0 #2d3436; font-size: 1vw; padding: 10px 15px; width: auto; }
+
+        /* Grade View Styles */
         select, .file-label { font-family: inherit; font-size: 1.2vw; padding: 5px 10px; border-radius: 8px; border: 2px solid var(--blue); cursor: pointer; background: white; font-weight: bold; }
         .file-label { background: var(--blue); color: white; border: none; }
         #fileInput { display: none; }
-
         .mode-toggle { display: flex; background: #dfe6e9; border-radius: 10px; padding: 3px; }
         .mode-btn { border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 1vw; }
         .mode-btn.active { background: var(--blue); color: white; }
+        .seat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.2%; width: 95%; height: 60%; margin-top: 10px; }
+        .seat-pill { font-size: 2.5vw; }
 
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.2%; width: 95%; height: 60%; margin-top: 10px; }
-        .pill { background: var(--blue); border: none; border-radius: 100px; display: flex; justify-content: center; align-items: center; font-size: 2.5vw; font-weight: 700; cursor: pointer; color: white; box-shadow: 0 0.4vw 0 #054475; transition: 0.1s; }
-        .pill.completed { background: var(--done) !important; box-shadow: 0 0.4vw 0 #27ae60 !important; pointer-events: none; opacity: 0.7; }
-        
+        /* Recording Modal & General */
         #overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 100; }
         .modal { background: white; padding: 3%; border-radius: 40px; text-align: center; width: 60%; border: 8px solid var(--green); }
         .word-display { font-size: 6vw; color: var(--red); margin: 15px 0; font-weight: 700; min-height: 1.2em; }
-        
-        button { font-family: inherit; font-size: 1.8vw; padding: 2%; border-radius: 60px; border: none; cursor: pointer; color: white; width: 100%; margin-bottom: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .action-btn { font-family: inherit; font-size: 1.8vw; padding: 2%; border-radius: 60px; border: none; cursor: pointer; color: white; width: 100%; margin-bottom: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-start { background: var(--green); }
         .btn-stop { background: var(--red); display: none; }
-        .btn-close { background: var(--grey); font-size: 1.2vw; }
+        .btn-close { background: var(--grey); font-size: 1.2vw; width: auto; margin-bottom: 0;}
         #status { font-size: 1.2vw; margin-top: 8px; color: var(--blue); font-weight: 700; }
     </style>
 </head>
 <body>
 
     <div class="game-canvas">
-        <div class="header-controls">
-            <div class="setup-group">
-                <span>class:</span>
-                <select id="classSelect">
-                    <option value="501">501</option><option value="502">502</option><option value="503">503</option>
-                    <option value="401">401</option><option value="402">402</option><option value="301">301</option>
-                </select>
-                
-                <label class="file-label" for="fileInput"><i data-lucide="upload"></i> upload words</label>
-                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv, .txt">
+        
+        <div id="lobbyView">
+            <h1>Teacher Wynn's Recorder Lobby</h1>
+            <p style="color:var(--grey);">Choose a grade level to start recording.</p>
+            <div class="lobby-grid">
+                <button class="pill-btn grade-pill" onclick="selectGrade(3)">Grade 3</button>
+                <button class="pill-btn grade-pill" onclick="selectGrade(4)">Grade 4</button>
+                <button class="pill-btn grade-pill" onclick="selectGrade(5)">Grade 5</button>
             </div>
-
-            <div class="setup-group">
-                <span>mode:</span>
-                <div class="mode-toggle">
-                    <button id="btnSeq" class="mode-btn active" onclick="setMode('seq')">sequential</button>
-                    <button id="btnRand" class="mode-btn" onclick="setMode('rand')">random</button>
-                </div>
-            </div>
+            <label class="danger pill-btn" for="fileInput"><i data-lucide="upload"></i> setup vocabulary (Word/Excel)</label>
+            <input type="file" id="fileInput" accept=".xlsx, .xls, .csv, .txt">
         </div>
 
-        <div class="grid" id="grid"></div>
+        <div id="gradeView">
+            <div class="setup-row">
+                <button class="pill-btn danger" onclick="goBack()"><i data-lucide="arrow-left"></i> back to lobby</button>
+                
+                <div style="display: flex; gap:10px; align-items: center;">
+                    <h2 id="gradeTitle" style="color:var(--green); margin:0;">Grade 5</h2>
+                    <span> class:</span>
+                    <select id="classSelect"></select> </div>
+
+                <div style="display: flex; gap:10px; align-items: center;">
+                    <span>mode:</span>
+                    <div class="mode-toggle">
+                        <button id="btnSeq" class="mode-btn active" onclick="setMode('seq')">sequential</button>
+                        <button id="btnRand" class="mode-btn" onclick="setMode('rand')">random</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="seat-grid" id="grid"></div>
+        </div>
 
         <div id="overlay">
             <div class="modal">
                 <div id="wordCounter" style="font-size: 1.2vw; color: var(--grey);">word 1 of 1</div>
                 <div class="word-display" id="wordBox">please upload words</div>
-                <button id="startBtn" class="btn-start" onclick="startRec()"><i data-lucide="mic"></i> start recording</button>
-                <button id="stopBtn" class="btn-stop" onclick="stopRec()">end & save</button>
-                <button class="btn-close" onclick="closeModal()">cancel</button>
-                <div id="status">ready</div>
+                <button id="startBtn" class="action-btn btn-start" onclick="startRec()"><i data-lucide="mic"></i> start recording</button>
+                <button id="stopBtn" class="action-btn btn-stop" onclick="stopRec()">end & save</button>
+                <div style="display:flex; justify-content:center; gap: 10px;">
+                    <button class="pill-btn btn-close" onclick="closeModal()">cancel</button>
+                    <div id="status">ready</div>
+                </div>
             </div>
         </div>
     </div>
@@ -80,8 +104,15 @@
     <script>
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxnJXyRbXOGolp7DKXxpcfNCPQdbCf2WkrXF88-PQi15K7Adm40TMhdHEmutJCtUTr4/exec';
         
-        let customWords = ["hello", "how are you?", "nice to meet you"];
+        // --- Central Vocabulary Store ---
+        let currentVocabulary = {
+            "3": ["apple", "banana", "cat", "dog"], // Default examples
+            "4": ["swimming", "library", "dancing"],
+            "5": ["delicious", "expensive", "how much is it?"]
+        };
+
         let playMode = 'seq'; 
+        let currentGrade = null;
         let curNum, curPill, recorder, chunks = [];
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -94,20 +125,56 @@
             
             reader.onload = function(evt) {
                 const data = evt.target.result;
+                let uploadedList = [];
                 if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
                     const workbook = XLSX.read(data, { type: 'binary' });
-                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                    customWords = json.flat().filter(word => word && word.toString().trim() !== "");
+                    uploadedList = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 }).flat().filter(word => word && word.toString().trim() !== "");
                 } else {
-                    customWords = data.split(/\r?\n/).filter(word => word.trim() !== "");
+                    uploadedList = data.split(/\r?\n/).filter(word => word.trim() !== "");
                 }
-                alert("successfully uploaded " + customWords.length + " items!");
+                
+                // --- INTEGRATION: Ask which grade this list is for ---
+                const gradeToAssign = prompt("Which grade is this vocabulary list for? (3, 4, or 5)");
+                if (gradeToAssign && currentVocabulary[gradeToAssign]) {
+                    currentVocabulary[gradeToAssign] = uploadedList;
+                    alert("successfully uploaded " + uploadedList.length + " items for Grade " + gradeToAssign + "!");
+                } else {
+                    alert("invalid grade entered. list not assigned.");
+                }
             };
             
             if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) reader.readAsBinaryString(file);
             else reader.readAsText(file);
         });
+
+        // Lobby Navigation
+        function selectGrade(grade) {
+            currentGrade = grade;
+            document.getElementById('gradeTitle').innerText = "Grade " + grade;
+            document.getElementById('lobbyView').style.display = 'none';
+            document.getElementById('gradeView').style.display = 'flex';
+            populateClassSelector(grade);
+            createGrid();
+        }
+
+        function goBack() {
+            document.getElementById('lobbyView').style.display = 'flex';
+            document.getElementById('gradeView').style.display = 'none';
+            currentGrade = null;
+        }
+
+        // Setup Class Options
+        function populateClassSelector(grade) {
+            const select = document.getElementById('classSelect');
+            select.innerHTML = '';
+            // Generate classes (e.g., 501, 502)
+            for (let i = 1; i <= 3; i++) {
+                const opt = document.createElement('option');
+                opt.value = grade + "0" + i;
+                opt.innerText = opt.value;
+                select.appendChild(opt);
+            }
+        }
 
         function setMode(m) {
             playMode = m;
@@ -120,7 +187,7 @@
             grid.innerHTML = '';
             for (let i = 1; i <= 25; i++) {
                 const p = document.createElement('div');
-                p.className = 'pill'; p.innerText = i;
+                p.className = 'pill-btn seat-pill'; p.innerText = i;
                 p.onclick = () => openRecorder(i, p);
                 grid.appendChild(p);
             }
@@ -128,16 +195,20 @@
 
         function openRecorder(num, pill) {
             curNum = num; curPill = pill;
+            const list = currentVocabulary[currentGrade];
             let displayWord = "";
             
-            if (playMode === 'rand') {
-                displayWord = customWords[Math.floor(Math.random() * customWords.length)];
+            if (!list || list.length === 0) {
+                displayWord = "no words uploaded for grade " + currentGrade;
+                document.getElementById('status').innerText = "upload a list first!";
+            } else if (playMode === 'rand') {
+                displayWord = list[Math.floor(Math.random() * list.length)];
                 document.getElementById('wordCounter').innerText = "random mode";
             } else {
-                // Sequential: Seat 1 gets Word 1, Seat 2 gets Word 2, etc.
-                const index = (num - 1) % customWords.length;
-                displayWord = customWords[index];
-                document.getElementById('wordCounter').innerText = "item " + (index + 1) + " of " + customWords.length;
+                // Sequential Logic
+                const index = (num - 1) % list.length;
+                displayWord = list[index];
+                document.getElementById('wordCounter').innerText = "item " + (index + 1) + " of " + list.length;
             }
 
             document.getElementById('wordBox').innerText = displayWord;
@@ -145,6 +216,7 @@
         }
 
         async function startRec() {
+            if (document.getElementById('wordBox').innerText.startsWith("no words")) return;
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 recorder = new MediaRecorder(stream, { audioBitsPerSecond: 64000 });
@@ -158,34 +230,33 @@
             } catch (err) { alert("please allow mic access!"); }
         }
 
-        function stopRec() { recorder.stop(); document.getElementById('status').innerText = "uploading..."; }
+        function stopRec() { recorder.stop(); document.getElementById('status').innerText = "compressing..."; }
 
         function upload() {
             const blob = new Blob(chunks, { type: 'audio/webm' });
             const reader = new FileReader();
             reader.readAsDataURL(blob);
             reader.onloadend = () => {
+                document.getElementById('status').innerText = "sending to drive...";
                 const base64 = reader.result.split(',')[1];
                 const selectedClass = document.getElementById('classSelect').value;
                 const params = new URLSearchParams();
                 params.append('audio', base64);
-                params.append('filename', `seat_${curNum}_${document.getElementById('wordBox').innerText}.webm`);
+                // INTEGRATION: Naming uses grade/seat combo
+                params.append('filename', `Seat_${curNum}_Item_${document.getElementById('wordBox').innerText}.webm`);
                 params.append('className', selectedClass);
 
                 fetch(scriptURL, { method: 'POST', body: params, mode: 'no-cors' }).then(() => {
-                    const osc = audioCtx.createOscillator();
-                    osc.connect(audioCtx.destination);
-                    osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+                    const osc = audioCtx.createOscillator(); osc.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.1);
                     curPill.classList.add('completed');
+                    curPill.innerText = curNum + " done ✓";
                     document.getElementById('status').innerText = "saved!";
-                    setTimeout(closeModal, 1000);
+                    setTimeout(closeModal, 1200);
                 });
             };
         }
 
-        function closeModal() { document.getElementById('overlay').style.display = 'none'; document.getElementById('startBtn').style.display = 'flex'; document.getElementById('stopBtn').style.display = 'none'; }
-        
-        createGrid();
+        function closeModal() { document.getElementById('overlay').style.display = 'none'; document.getElementById('startBtn').style.display = 'flex'; document.getElementById('stopBtn').style.display = 'none'; document.getElementById('status').innerText = 'ready';}
     </script>
 </body>
 </html>
