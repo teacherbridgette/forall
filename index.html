@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>teacher wynn's recorder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root { --blue: #0984e3; --green: #00b894; --done: #2ecc71; --red: #d63031; }
+        body { font-family: 'Fredoka', "Comic Sans MS", cursive, sans-serif; background-color: #1e272e; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; text-transform: lowercase; }
+        .game-canvas { width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; background: #ffffff; position: relative; display: flex; flex-direction: column; align-items: center; padding: 2%; box-sizing: border-box; border-radius: 20px; border: 10px solid var(--blue); }
+        
+        .header-controls { display: flex; gap: 15px; align-items: center; margin-bottom: 10px; width: 95%; justify-content: space-between; }
+        .left-controls { display: flex; gap: 15px; align-items: center; }
+        
+        select { font-family: inherit; font-size: 1.5vw; padding: 5px 15px; border-radius: 10px; border: 3px solid var(--blue); cursor: pointer; background: white; font-weight: bold; }
+        h1 { color: var(--green); margin: 0; font-size: 2.5vw; font-weight: 700; }
+        
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5%; width: 95%; height: 65%; margin-top: 10px; }
+        .pill { background: var(--blue); border: none; border-radius: 100px; display: flex; justify-content: center; align-items: center; font-size: 3vw; font-weight: 700; cursor: pointer; color: white; box-shadow: 0 0.5vw 0 #054475; transition: 0.1s; }
+        .pill:nth-child(even) { background: var(--green); box-shadow: 0 0.5vw 0 #00705a; }
+        .pill.completed { background: var(--done) !important; box-shadow: 0 0.5vw 0 #27ae60 !important; pointer-events: none; opacity: 0.7; }
+        
+        #overlay, #settingsOverlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 100; }
+        .modal { background: white; padding: 4%; border-radius: 40px; text-align: center; width: 55%; border: 8px solid var(--green); }
+        .word-display { font-size: 8vw; color: var(--red); margin: 15px 0; font-weight: 700; }
+        
+        button { font-family: inherit; font-size: 2vw; padding: 2.5%; border-radius: 60px; border: none; cursor: pointer; color: white; width: 100%; margin-bottom: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-start { background: var(--green); }
+        .btn-stop { background: var(--red); display: none; }
+        .btn-close { background: #636e72; font-size: 1.5vw; }
+        .btn-settings { width: auto; padding: 10px; background: #636e72; border-radius: 10px; border: none; cursor: pointer; color: white; }
+        
+        #status { font-size: 1.5vw; margin-top: 10px; color: var(--blue); font-weight: 700; }
+        input[type="text"] { width: 90%; padding: 10px; margin: 10px 0; border-radius: 10px; border: 2px solid var(--blue); font-family: inherit; }
+        .recording-pulse { width: 15px; height: 15px; background: white; border-radius: 50%; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="game-canvas">
+        <div class="header-controls">
+            <div class="left-controls">
+                <h1>班級:</h1>
+                <select id="classSelect">
+                    <option value="501">501</option><option value="502">502</option><option value="503">503</option>
+                    <option value="401">401</option><option value="402">402</option><option value="403">403</option>
+                    <option value="301">301</option><option value="302">302</option><option value="303">303</option>
+                </select>
+                <h1>點擊座號錄音</h1>
+            </div>
+            <button class="btn-settings" onclick="openSettings()"><i data-lucide="settings"></i></button>
+        </div>
+
+        <div class="grid" id="grid"></div>
+
+        <div id="overlay">
+            <div class="modal">
+                <div class="word-display" id="wordBox">word</div>
+                <button id="startBtn" class="btn-start" onclick="startRec()"><i data-lucide="mic"></i> 開始錄音</button>
+                <button id="stopBtn" class="btn-stop" onclick="stopRec()"><div class="recording-pulse"></div> 結束並儲存</button>
+                <button class="btn-close" onclick="closeModal()">關閉</button>
+                <div id="status">準備好了</div>
+            </div>
+        </div>
+
+        <div id="settingsOverlay">
+            <div class="modal" style="border-color: var(--blue);">
+                <h2>設定 (settings)</h2>
+                <p>webapp url:</p>
+                <input type="text" id="urlInput" placeholder="https://script.google.com/macros/s/...">
+                <button class="btn-start" onclick="saveSettings()">儲存設定</button>
+                <button class="btn-close" onclick="document.getElementById('settingsOverlay').style.display='none'">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // UPDATED WITH YOUR LATEST URL
+        let scriptURL = localStorage.getItem('teacherWynnUrl') || 'https://script.google.com/macros/s/AKfycbxnJXyRbXOGolp7DKXxpcfNCPQdbCf2WkrXF88-PQi15K7Adm40TMhdHEmutJCtUTr4/exec';
+
+        const vocabulary = {
+            "3": ["apple", "banana", "cat", "dog", "blue", "red"],
+            "4": ["swimming", "dancing", "reading", "cooking", "library"],
+            "5": ["how much is it?", "delicious", "expensive", "where are you going?"]
+        };
+
+        let curNum, curPill, recorder, chunks = [];
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSuccessSound() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+        }
+
+        lucide.createIcons();
+
+        for (let i = 1; i <= 25; i++) {
+            const p = document.createElement('div');
+            p.className = 'pill'; p.innerText = i;
+            p.onclick = () => {
+                const selectedClass = document.getElementById('classSelect').value;
+                const list = vocabulary[selectedClass.charAt(0)];
+                curNum = i; curPill = p;
+                document.getElementById('wordBox').innerText = list[Math.floor(Math.random()*list.length)];
+                document.getElementById('overlay').style.display = 'flex';
+                document.getElementById('status').innerText = "準備好了";
+            };
+            document.getElementById('grid').appendChild(p);
+        }
+
+        async function startRec() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                recorder = new MediaRecorder(stream, { audioBitsPerSecond: 64000 });
+                chunks = [];
+                recorder.ondataavailable = e => chunks.push(e.data);
+                recorder.onstop = upload;
+                recorder.start();
+                document.getElementById('startBtn').style.display = 'none';
+                document.getElementById('stopBtn').style.display = 'flex';
+                document.getElementById('status').innerText = "正在錄音...";
+            } catch (err) { alert("請允許麥克風權限!"); }
+        }
+
+        function stopRec() { recorder.stop(); document.getElementById('status').innerText = "正在儲存..."; }
+
+        function upload() {
+            const blob = new Blob(chunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = () => {
+                const base64 = reader.result.split(',')[1];
+                const selectedClass = document.getElementById('classSelect').value;
+                
+                const params = new URLSearchParams();
+                params.append('audio', base64);
+                params.append('filename', `student_${curNum}.webm`);
+                params.append('className', selectedClass);
+
+                fetch(scriptURL, { method: 'POST', body: params, mode: 'no-cors' }).then(() => {
+                    playSuccessSound();
+                    curPill.innerText = "✓";
+                    curPill.classList.add('completed');
+                    document.getElementById('status').innerText = "儲存成功!";
+                    setTimeout(closeModal, 1200);
+                });
+            };
+        }
+
+        function openSettings() {
+            document.getElementById('urlInput').value = scriptURL;
+            document.getElementById('settingsOverlay').style.display = 'flex';
+        }
+
+        function saveSettings() {
+            const newUrl = document.getElementById('urlInput').value;
+            localStorage.setItem('teacherWynnUrl', newUrl);
+            scriptURL = newUrl;
+            document.getElementById('settingsOverlay').style.display = 'none';
+            alert("設定已儲存!");
+        }
+
+        function closeModal() { document.getElementById('overlay').style.display = 'none'; document.getElementById('startBtn').style.display = 'flex'; document.getElementById('stopBtn').style.display = 'none'; }
+    </script>
+</body>
+</html>
