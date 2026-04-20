@@ -3,190 +3,393 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wynn's Fast Recorder</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <title>Wynn's Recording Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        :root { --p: #4834d4; --bg: #f0f2f5; --txt: #2f3542; --done: #6ab04c; --err: #eb4d4b; }
-        body { font-family: 'Fredoka', "Comic Sans MS", cursive; background: var(--bg); margin: 0; text-transform: lowercase; color: var(--txt); -webkit-user-select: none; }
-        
-        .app-shell { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .view { width: 94%; height: 90%; background: white; border-radius: 35px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); display: none; flex-direction: column; position: relative; overflow: hidden; border: 6px solid var(--p); }
-        
-        #lobby { display: flex; align-items: center; justify-content: center; gap: 30px; }
-        .grade-btn { background: var(--p); color: white; border: none; padding: 40px 60px; border-radius: 25px; font-size: 3.5vw; cursor: pointer; box-shadow: 0 8px 0 #2f24a3; transition: 0.1s; font-family: inherit; }
-        .grade-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #2f24a3; }
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --bg: #f8f9fd;
+            --card-bg: #ffffff;
+            --text: #2d3436;
+            --success: #00b894;
+            --error: #ff7675;
+            --accent: #fdcb6e;
+        }
 
-        .top-nav { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; }
-        .grid-container { flex: 1; display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; padding: 20px; overflow-y: auto; background: #fafafa; }
-        .seat-card { background: white; border: 2px solid #eee; border-radius: 15px; font-size: 2vw; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; min-height: 80px; transition: 0.2s; box-shadow: 0 4px 0 #eee; }
-        .seat-card.done { background: var(--done); color: white; border-color: var(--done); box-shadow: 0 4px 0 #2d7a3a; }
+        body {
+            font-family: 'Fredoka', "Comic Sans MS", cursive;
+            background: var(--bg);
+            margin: 0;
+            color: var(--text);
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        #settingsOverlay { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.98); z-index: 100; padding: 40px; flex-direction: column; align-items: center; justify-content: center; }
-        .input-group { width: 80%; margin-bottom: 20px; text-align: left; }
-        .input-group label { font-weight: 600; color: var(--p); display: block; margin-bottom: 8px; }
-        .field { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #ddd; font-family: inherit; font-size: 1.1vw; box-sizing: border-box; }
+        /* App Wrapper */
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at top left, #a29bfe33, transparent),
+                        radial-gradient(circle at bottom right, #6c5ce722, transparent);
+        }
 
-        #modalOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .modal-body { background: white; width: 60%; padding: 40px; border-radius: 40px; text-align: center; }
-        .sentence-display { font-size: 3vw; color: var(--err); margin: 25px 0; font-weight: 600; min-height: 80px; display: flex; align-items: center; justify-content: center; }
-        .btn-large { width: 100%; padding: 18px; border-radius: 40px; border: none; font-size: 1.8vw; color: white; cursor: pointer; font-family: inherit; font-weight: 700; }
+        /* Main View Card */
+        .view-card {
+            width: 95%;
+            height: 92%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+            border: 4px solid white;
+            display: none;
+            flex-direction: column;
+            position: relative;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Lobby Style */
+        #lobby { display: flex; align-items: center; justify-content: center; gap: 40px; }
+        .lobby-title { position: absolute; top: 10%; font-size: 3.5vw; color: var(--primary); letter-spacing: -1px; }
+
+        .grade-card {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 35px;
+            box-shadow: 0 15px 35px rgba(108, 92, 231, 0.15);
+            border: 3px solid transparent;
+            transition: 0.3s;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .grade-card:hover { border-color: var(--primary); transform: translateY(-10px); }
+        .grade-card h2 { font-size: 4vw; margin: 0; color: var(--primary); }
+
+        /* Toolbar */
+        .navbar {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-bottom: 2px solid #f1f1f1;
+            border-radius: 40px 40px 0 0;
+        }
+
+        .nav-controls { display: flex; gap: 15px; align-items: center; }
+
+        .styled-select {
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 2px solid #eee;
+            font-family: inherit;
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Classroom Grid */
+        .student-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .seat {
+            background: white;
+            border-radius: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #b2bec3;
+            border: 3px solid #f1f1f1;
+            transition: 0.2s;
+            cursor: pointer;
+            position: relative;
+            min-height: 120px;
+        }
+
+        .seat:active { transform: scale(0.95); }
+        .seat.active-seat { border-color: var(--accent); color: var(--accent); }
+        .seat.done { 
+            background: var(--success); 
+            color: white; 
+            border-color: var(--success);
+            box-shadow: 0 10px 20px rgba(0, 184, 148, 0.3);
+        }
+
+        /* Setup Panel Overlay */
+        #setupOverlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: white;
+            z-index: 100;
+            border-radius: 40px;
+            padding: 60px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .setup-row { width: 100%; max-width: 700px; margin-bottom: 30px; }
+        .setup-row label { font-weight: 700; font-size: 1.4rem; color: var(--primary); display: block; margin-bottom: 10px; }
+        .setup-input { 
+            width: 100%; padding: 18px; border-radius: 20px; border: 3px solid #eee; 
+            font-size: 1.2rem; font-family: inherit; transition: 0.3s;
+        }
+        .setup-input:focus { border-color: var(--primary); outline: none; }
+
+        /* Recording Modal */
+        #recorderModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(45, 52, 54, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            width: 70%;
+            max-width: 800px;
+            padding: 50px;
+            border-radius: 50px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 30px 100px rgba(0,0,0,0.3);
+        }
+
+        .display-text {
+            font-size: 4vw;
+            line-height: 1.2;
+            color: var(--error);
+            font-weight: 700;
+            margin: 40px 0;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rec-btn {
+            width: 100%;
+            padding: 25px;
+            border-radius: 30px;
+            border: none;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-start { background: var(--success); box-shadow: 0 10px 0 #009475; }
+        .btn-stop { background: var(--error); box-shadow: 0 10px 0 #d63031; }
+        .btn-start:active, .btn-stop:active { transform: translateY(6px); box-shadow: 0 4px 0 transparent; }
+
+        .status-badge {
+            margin-top: 25px;
+            padding: 10px 25px;
+            background: #f1f1f1;
+            border-radius: 50px;
+            display: inline-block;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .close-icon { position: absolute; top: 30px; right: 30px; cursor: pointer; color: #ccc; }
     </style>
 </head>
 <body>
 
-    <div class="app-shell">
-        <div id="lobby" class="view" style="display: flex;">
-            <h1 style="position:absolute; top:30px; color:var(--p);">Teacher Wynn's Recording Studio</h1>
-            <button class="grade-btn" onclick="openMain(3)">grade 3</button>
-            <button class="grade-btn" onclick="openMain(4)">grade 4</button>
-            <button class="grade-btn" onclick="openMain(5)">grade 5</button>
-        </div>
-
-        <div id="main" class="view">
-            <div class="top-nav">
-                <button onclick="location.reload()" style="border:none; background:none; cursor:pointer;"><i data-lucide="home"></i></button>
-                <div style="display:flex; gap:15px; align-items:center;">
-                    <h2 id="gradeLabel" style="color:var(--p); margin:0;">grade 5</h2>
-                    <select id="classSelect" class="field" style="width:auto;"></select>
-                    <select id="taskSelect" class="field" style="width:auto;">
-                        <option value="1">1 sentence</option>
-                        <option value="all">read all</option>
-                    </select>
-                </div>
-                <button onclick="toggleSetup(true)" style="border:none; background:none; cursor:pointer;"><i data-lucide="settings"></i></button>
-            </div>
-
-            <div class="grid-container" id="seatGrid"></div>
-
-            <div id="settingsOverlay">
-                <h2 style="color:var(--p);">automatic drive setup (<span id="setupGrade"></span>)</h2>
-                <div class="input-group">
-                    <label>google drive folder link:</label>
-                    <input type="text" id="driveLink" class="field" placeholder="Paste your Drive link here...">
-                </div>
-                <div class="input-group">
-                    <label>vocabulary file (excel or txt):</label>
-                    <input type="file" id="fileInput" class="field">
-                </div>
-                <button class="grade-btn" style="font-size:1.5vw; padding:15px 30px;" onclick="toggleSetup(false)">Save & Start Class</button>
-            </div>
-        </div>
+<div class="app-container">
+    <div id="lobby" class="view-card" style="display: flex;">
+        <h1 class="lobby-title">teacher wynn's recorder</h1>
+        <div class="grade-card" onclick="startSession(3)"><h2>Grade 3</h2></div>
+        <div class="grade-card" onclick="startSession(4)"><h2>Grade 4</h2></div>
+        <div class="grade-card" onclick="startSession(5)"><h2>Grade 5</h2></div>
     </div>
 
-    <div id="modalOverlay">
-        <div class="modal-body">
-            <div id="sentenceBox" class="sentence-display">loading...</div>
-            <button id="startBtn" class="btn-large" style="background:var(--done);" onclick="startRecording()">Start Recording</button>
-            <button id="stopBtn" class="btn-large" style="background:var(--err); display:none;" onclick="stopRecording()">Stop & Fast Save</button>
-            <div id="statusMsg" style="margin-top:15px; font-weight:600; color:var(--p);">ready</div>
-            <button onclick="closeModal()" style="background:none; border:none; margin-top:15px; color:#aaa; cursor:pointer;">cancel</button>
+    <div id="mainView" class="view-card">
+        <div class="navbar">
+            <button onclick="location.reload()" style="border:none; background:none; cursor:pointer; color:var(--primary);"><i data-lucide="home" size="36"></i></button>
+            
+            <div class="nav-controls">
+                <span id="currentGradeDisplay" style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">Grade 5</span>
+                <select id="classSelect" class="styled-select"></select>
+                <select id="taskMode" class="styled-select">
+                    <option value="single">Single Word</option>
+                    <option value="full">Full List</option>
+                </select>
+            </div>
+
+            <button onclick="toggleSetup(true)" style="border:none; background:none; cursor:pointer; color:var(--primary);"><i data-lucide="settings" size="36"></i></button>
+        </div>
+
+        <div class="student-grid" id="seatGrid"></div>
+
+        <div id="setupOverlay">
+            <h1 style="color:var(--primary); font-size: 3rem; margin-bottom: 40px;">Teacher Setup</h1>
+            
+            <div class="setup-row">
+                <label>1. Google Drive Folder Link</label>
+                <input type="text" id="driveLinkInput" class="setup-input" placeholder="Paste link here...">
+            </div>
+
+            <div class="setup-row">
+                <label>2. Upload Vocabulary (Excel/TXT)</label>
+                <input type="file" id="fileInput" class="setup-input">
+            </div>
+
+            <button class="rec-btn btn-start" style="width: auto; padding: 20px 60px; margin-top: 20px;" onclick="toggleSetup(false)">Save & Close</button>
         </div>
     </div>
+</div>
 
-    <script>
-        // UPDATED WEB APP URL
-        const webAppURL = 'https://script.google.com/macros/s/AKfycbyJ76MwJxw4GSW2tJTuIInScn972G3kNnZCGiF_Vy10QuF9sb1u30i_Iauo0CnBXs8b/exec';
+<div id="recorderModal">
+    <div class="modal-content">
+        <div class="close-icon" onclick="closeModal()"><i data-lucide="x-circle" size="40"></i></div>
+        <h2 style="margin: 0; color: var(--primary);">Seat <span id="seatLabel"></span></h2>
         
-        let vocabData = { "3":[], "4":[], "5":[] };
-        let activeGrade, recorder, chunks = [], currentSeat, currentEl;
+        <div id="wordDisplay" class="display-text">Ready?</div>
+        
+        <button id="startBtn" class="rec-btn btn-start" onclick="beginRec()">Start Recording</button>
+        <button id="stopBtn" class="rec-btn btn-stop" style="display:none;" onclick="endRec()">Stop & Save</button>
+        
+        <div class="status-badge" id="statusMsg">Waiting...</div>
+    </div>
+</div>
 
-        lucide.createIcons();
+<script>
+    const webAppURL = 'https://script.google.com/macros/s/AKfycbyJ76MwJxw4GSW2tJTuIInScn972G3kNnZCGiF_Vy10QuF9sb1u30i_Iauo0CnBXs8b/exec';
+    const ding = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+    
+    let activeGrade, recorder, chunks = [], currentSeat, currentEl, streamRef;
+    let wordLists = { "3":[], "4":[], "5":[] };
 
-        function openMain(g) {
-            activeGrade = g;
-            document.getElementById('lobby').style.display = 'none';
-            document.getElementById('main').style.display = 'flex';
-            document.getElementById('gradeLabel').innerText = "grade " + g;
-            document.getElementById('setupGrade').innerText = "grade " + g;
+    lucide.createIcons();
+
+    function startSession(g) {
+        activeGrade = g;
+        document.getElementById('lobby').style.display = 'none';
+        document.getElementById('mainView').style.display = 'flex';
+        document.getElementById('currentGradeDisplay').innerText = "Grade " + g;
+        
+        const cSel = document.getElementById('classSelect');
+        cSel.innerHTML = '';
+        [1,2,3,4,5].forEach(i => { let o = document.createElement('option'); o.value = g+"0"+i; o.innerText = g+"0"+i; cSel.appendChild(o); });
+        
+        const grid = document.getElementById('seatGrid');
+        grid.innerHTML = '';
+        for(let i=1; i<=30; i++) {
+            let s = document.createElement('div');
+            s.className = 'seat';
+            s.innerHTML = `<span>${i}</span><div style="font-size:0.8rem; margin-top:5px; opacity:0.5;">READY</div>`;
+            s.onclick = () => openModal(i, s);
+            grid.appendChild(s);
+        }
+    }
+
+    function toggleSetup(show) { document.getElementById('setupOverlay').style.display = show ? 'flex' : 'none'; }
+
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            let list = (file.name.match(/\.xls/)) ? 
+                XLSX.utils.sheet_to_json(XLSX.read(evt.target.result, {type:'binary'}).Sheets[XLSX.read(evt.target.result, {type:'binary'}).SheetNames[0]], {header:1}).flat() :
+                evt.target.result.split(/\n/).map(s => s.trim());
+            wordLists[activeGrade] = list.filter(s => s && s.length > 0);
+            alert("Loaded " + wordLists[activeGrade].length + " items!");
+        };
+        if(file.name.match(/\.xls/)) reader.readAsBinaryString(file); else reader.readAsText(file);
+    });
+
+    function openModal(num, el) {
+        currentSeat = num; currentEl = el;
+        const list = wordLists[activeGrade];
+        const mode = document.getElementById('taskMode').value;
+        
+        document.getElementById('seatLabel').innerText = num;
+        if(list.length === 0) { document.getElementById('wordDisplay').innerText = "No words found"; }
+        else { document.getElementById('wordDisplay').innerText = (mode === 'full') ? list.join(" • ") : list[(num-1) % list.length]; }
+        
+        document.getElementById('recorderModal').style.display = 'flex';
+        document.getElementById('statusMsg').innerText = "Ready to record";
+    }
+
+    async function beginRec() {
+        try {
+            streamRef = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recorder = new MediaRecorder(streamRef, { audioBitsPerSecond: 24000 });
+            chunks = [];
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = saveToDrive;
+            recorder.start();
             
-            const sel = document.getElementById('classSelect');
-            sel.innerHTML = '';
-            [1,2,3,4,5].forEach(n => { let o = document.createElement('option'); o.value = g+"0"+n; o.innerText = g+"0"+n; sel.appendChild(o); });
-            
-            const grid = document.getElementById('seatGrid');
-            grid.innerHTML = '';
-            for(let i=1; i<=30; i++) {
-                let s = document.createElement('div'); s.className = 'seat-card'; s.innerText = i;
-                s.onclick = () => openModal(i, s);
-                grid.appendChild(s);
-            }
-        }
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'block';
+            document.getElementById('statusMsg').innerText = "Recording...";
+        } catch (err) { alert("Please allow Microphone access!"); }
+    }
 
-        function toggleSetup(s) { document.getElementById('settingsOverlay').style.display = s ? 'flex' : 'none'; }
+    function endRec() {
+        recorder.stop();
+        streamRef.getTracks().forEach(t => t.stop());
+        document.getElementById('statusMsg').innerText = "Sending to Drive...";
+    }
 
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                let list = (file.name.match(/\.xls/)) ? 
-                    XLSX.utils.sheet_to_json(XLSX.read(evt.target.result, {type:'binary'}).Sheets[XLSX.read(evt.target.result, {type:'binary'}).SheetNames[0]], {header:1}).flat() :
-                    evt.target.result.split(/\n/).map(s => s.trim());
-                vocabData[activeGrade] = list.filter(s => s && s.length > 0);
-                alert("Success! " + vocabData[activeGrade].length + " sentences loaded.");
-            };
-            if(file.name.match(/\.xls/)) reader.readAsBinaryString(file); else reader.readAsText(file);
-        });
+    function saveToDrive() {
+        const reader = new FileReader();
+        reader.readAsDataURL(new Blob(chunks));
+        reader.onloadend = () => {
+            const link = document.getElementById('driveLinkInput').value;
+            const id = (link.match(/[-\w]{25,}/) || [""])[0];
 
-        function openModal(n, el) {
-            currentSeat = n; currentEl = el;
-            const list = vocabData[activeGrade];
-            const task = document.getElementById('taskSelect').value;
-            if(list.length === 0) { document.getElementById('sentenceBox').innerText = "no words uploaded"; }
-            else { document.getElementById('sentenceBox').innerText = (task === 'all') ? list.join(" | ") : list[(n-1) % list.length]; }
-            document.getElementById('modalOverlay').style.display = 'flex';
-        }
+            const fd = new URLSearchParams();
+            fd.append('audio', reader.result.split(',')[1]);
+            fd.append('className', document.getElementById('classSelect').value);
+            fd.append('filename', `Seat${currentSeat}_G${activeGrade}.webm`);
+            fd.append('folderId', id);
 
-        async function startRecording() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                // FAST UPLOAD OPTIMIZATION
-                recorder = new MediaRecorder(stream, { audioBitsPerSecond: 32000 });
-                chunks = [];
-                recorder.ondataavailable = e => chunks.push(e.data);
-                recorder.onstop = uploadAudio;
-                recorder.start();
-                document.getElementById('startBtn').style.display = 'none';
-                document.getElementById('stopBtn').style.display = 'block';
-                document.getElementById('statusMsg').innerText = "🔴 Recording...";
-            } catch (err) { alert("Enable Microphone Access!"); }
-        }
+            fetch(webAppURL, { method: 'POST', body: fd, mode: 'no-cors' }).then(() => {
+                ding.play();
+                currentEl.classList.add('done');
+                currentEl.innerHTML = `<span>${currentSeat}</span><div style="font-size:0.8rem; margin-top:5px;">SAVED ✓</div>`;
+                document.getElementById('statusMsg').innerText = "Saved Successfully!";
+                setTimeout(closeModal, 1000);
+            });
+        };
+    }
 
-        function stopRecording() { 
-            recorder.stop(); 
-            document.getElementById('statusMsg').innerText = "⚡ Saving Fast..."; 
-        }
+    function closeModal() {
+        document.getElementById('recorderModal').style.display = 'none';
+        document.getElementById('startBtn').style.display = 'block';
+        document.getElementById('stopBtn').style.display = 'none';
+    }
+</script>
 
-        function uploadAudio() {
-            const reader = new FileReader();
-            reader.readAsDataURL(new Blob(chunks));
-            reader.onloadend = () => {
-                const link = document.getElementById('driveLink').value;
-                const idMatch = link.match(/[-\w]{25,}/);
-                const folderId = idMatch ? idMatch[0] : "";
-
-                const fd = new URLSearchParams();
-                fd.append('audio', reader.result.split(',')[1]);
-                fd.append('className', document.getElementById('classSelect').value);
-                fd.append('filename', `Seat${currentSeat}.webm`);
-                fd.append('folderId', folderId);
-
-                fetch(webAppURL, { method: 'POST', body: fd, mode: 'no-cors', keepalive: true }).then(() => {
-                    currentEl.classList.add('done');
-                    currentEl.innerHTML = `${currentSeat} <span style="font-size:1vw;">✓</span>`;
-                    closeModal();
-                });
-            };
-        }
-
-        function closeModal() { 
-            document.getElementById('modalOverlay').style.display = 'none'; 
-            document.getElementById('startBtn').style.display = 'block';
-            document.getElementById('stopBtn').style.display = 'none';
-            document.getElementById('statusMsg').innerText = "ready";
-        }
-    </script>
 </body>
 </html>
