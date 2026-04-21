@@ -19,7 +19,8 @@
         
         body { 
             font-family: 'Fredoka', "Comic Sans MS", cursive;
-            background: var(--bg); 
+            /* Requirement 5: Add bg.jpg */
+            background: url('bg.jpg') center/cover no-repeat fixed; 
             margin: 0; 
             text-transform: lowercase; 
             overflow: hidden; 
@@ -29,17 +30,9 @@
         .app { 
             width: 100vw;
             height: 100vh; display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, #f0f3f9 0%, #dbe3f0 100%);
+            background: rgba(240, 243, 249, 0.4); /* Overlay for bg.jpg visibility */
             position: relative;
         }
-        
-        .blob {
-            position: absolute;
-            width: 500px; height: 500px; background: var(--p);
-            filter: blur(80px); opacity: 0.1; border-radius: 50%; z-index: 0;
-            animation: float 20s infinite alternate;
-        }
-        @keyframes float { from { transform: translate(-10%, -10%); } to { transform: translate(10%, 10%); } }
 
         .view { 
             width: 96%;
@@ -53,264 +46,222 @@
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* LOBBY: UPDATED FOR 6 GRADES HORIZONTALLY */
+        /* Requirement 6: Grade pills 3 columns, 2 rows */
         #lobby { 
-            display: flex;
-            flex-direction: row; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 20px; 
-            padding: 0 40px;
-            overflow-x: auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 25px;
+            padding: 100px 60px 60px 60px;
+            box-sizing: border-box;
         }
+
         .grade-pill { 
             background: white;
-            padding: 80px 50px; /* Bigger Pills */
-            border-radius: 45px; 
+            border-radius: 40px; 
             box-shadow: 0 15px 35px rgba(108, 92, 231, 0.1); 
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: center; border: 4px solid transparent;
-            min-width: 140px;
+            display: flex; align-items: center; justify-content: center;
+            border: 4px solid transparent;
         }
         .grade-pill:hover { 
-            transform: translateY(-15px) scale(1.05);
+            transform: translateY(-10px);
             border-color: var(--p);
             box-shadow: 0 25px 50px rgba(108, 92, 231, 0.2);
         }
-        .grade-pill h2 { font-size: 4rem; margin: 0; color: var(--p); letter-spacing: -2px; }
+        /* Requirement 2: "Grade 1" not "g1" */
+        .grade-pill h2 { font-size: 2.5rem; margin: 0; color: var(--p); }
 
-        /* NAVBAR & GRID */
         .navbar { padding: 25px 50px; display: flex; justify-content: space-between; align-items: center; }
-        .g-label { font-size: 2rem; font-weight: 700; color: var(--p); }
-        
-        .grid { 
-            flex: 1;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-            gap: 20px; padding: 0 50px 50px 50px; overflow-y: auto;
-        }
+        .grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; padding: 0 50px 50px 50px; overflow-y: auto; }
 
         .seat { 
-            background: white;
-            border-radius: 30px; border: 2px solid transparent;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            font-size: 1.2rem; font-weight: 700; min-height: 140px; 
-            cursor: pointer; transition: 0.3s; color: #2d3436;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.03);
-            text-align: center; padding: 10px;
+            background: white; border-radius: 30px; display: flex; align-items: center; justify-content: center; 
+            font-size: 2.5rem; font-weight: 700; min-height: 120px; cursor: pointer; transition: 0.3s; color: #b2bec3;
         }
-        .seat span.seat-num { font-size: 2.5rem; display: block; margin-bottom: 5px; color: #b2bec3; }
         .seat.done { background: var(--s); color: white; transform: rotate(-2deg); }
-        .seat.done span.seat-num { color: white; }
 
-        /* MODALS */
-        #modal, #configModal { 
-            display: none;
-            position: fixed; inset: 0; 
-            background: rgba(45, 52, 54, 0.4); backdrop-filter: blur(12px); 
-            z-index: 1000; align-items: center; justify-content: center;
-        }
-        .modal-c { 
-            background: white;
-            width: 85%; max-width: 850px; 
-            padding: 50px; border-radius: 60px; text-align: center; 
-            box-shadow: 0 40px 100px rgba(0,0,0,0.2);
-        }
+        .input-f { background: white; padding: 15px; border-radius: 20px; border: 2px solid #edf2f7; font-family: inherit; outline: none; }
+        .btn { width: 100%; padding: 20px; border-radius: 35px; border: none; font-size: 1.8rem; font-weight: 700; color: white; cursor: pointer; }
 
-        .input-f { 
-            background: #f8faff;
-            padding: 18px 25px; border-radius: 20px; width: 100%; box-sizing: border-box;
-            border: 2px solid #edf2f7; font-family: inherit; font-size: 1.1rem; outline: none;
-            margin-bottom: 15px;
-        }
+        /* Requirement 1: Fullscreen Button */
+        .fs-toggle { position: absolute; top: 20px; right: 20px; z-index: 100; cursor: pointer; color: var(--p); opacity: 0.5; }
 
-        .btn { 
-            width: 100%;
-            padding: 20px; border-radius: 30px; border: none; 
-            font-size: 1.8rem; font-weight: 700; color: white; cursor: pointer;
-            transition: 0.3s; box-shadow: 0 8px 0 rgba(0,0,0,0.1);
-            margin-top: 10px;
-        }
-        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+        #modal { display: none; position: fixed; inset: 0; background: rgba(45, 52, 54, 0.4); backdrop-filter: blur(12px); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-c { background: white; width: 80%; max-width: 800px; padding: 50px; border-radius: 60px; text-align: center; }
     </style>
 </head>
 <body>
 
+<div class="fs-toggle" onclick="toggleFS()"><i data-lucide="maximize" id="fsIcon"></i></div>
+
 <div class="app">
-    <div class="blob"></div>
-    
-    <div id="lobby" class="view" style="display: flex;">
-        <h1 style="position:absolute; top:8%; font-size:2.5rem; color:var(--p); opacity:0.6;">recording studio</h1>
-        <div class="grade-pill" onclick="promptConfig(1)"><h2>g1</h2></div>
-        <div class="grade-pill" onclick="promptConfig(2)"><h2>g2</h2></div>
-        <div class="grade-pill" onclick="promptConfig(3)"><h2>g3</h2></div>
-        <div class="grade-pill" onclick="promptConfig(4)"><h2>g4</h2></div>
-        <div class="grade-pill" onclick="promptConfig(5)"><h2>g5</h2></div>
-        <div class="grade-pill" onclick="promptConfig(6)"><h2>g6</h2></div>
+    <div id="lobby" class="view" style="display: grid;">
+        <h1 style="position:absolute; top:20px; left:50%; transform:translateX(-50%); font-size:2rem; color:var(--p); opacity:0.6;">recording studio</h1>
+        <div class="grade-pill" onclick="launch(1)" onmouseover="playHover()"><h2>grade 1</h2></div>
+        <div class="grade-pill" onclick="launch(2)" onmouseover="playHover()"><h2>grade 2</h2></div>
+        <div class="grade-pill" onclick="launch(3)" onmouseover="playHover()"><h2>grade 3</h2></div>
+        <div class="grade-pill" onclick="launch(4)" onmouseover="playHover()"><h2>grade 4</h2></div>
+        <div class="grade-pill" onclick="launch(5)" onmouseover="playHover()"><h2>grade 5</h2></div>
+        <div class="grade-pill" onclick="launch(6)" onmouseover="playHover()"><h2>grade 6</h2></div>
     </div>
 
     <div id="main" class="view">
         <div class="navbar">
             <button onclick="location.reload()" style="border:none; background:none; cursor:pointer; color:var(--p);"><i data-lucide="arrow-left-circle" size="40"></i></button>
             <div style="display:flex; gap:20px; align-items:center;">
-                <span id="gLabel" class="g-label"></span>
-                <select id="classSel" class="input-f" style="margin:0; width:auto;" onchange="saveSettings()"></select>
+                <span id="gLabel" style="font-size:1.5rem; font-weight:700; color:var(--p);"></span>
+                <select id="classSel" class="input-f" onchange="saveSettings()"></select>
+                <input type="color" id="themeColor" value="#6c5ce7" onchange="updateTheme(this.value)" style="border:none; width:40px; height:40px; cursor:pointer;">
             </div>
             <button onclick="toggleSetup(true)" style="border:none; background:none; cursor:pointer; color:var(--p);"><i data-lucide="settings" size="40"></i></button>
         </div>
-        <div class="grid" id="seatGrid"></div>
-    </div>
-</div>
-
-<div id="configModal">
-    <div class="modal-c">
-        <h2 style="color:var(--p); font-size:2.5rem; margin-bottom:30px;">setup grade <span id="confG"></span></h2>
         
-        <label style="display:block; text-align:left; margin-bottom:5px; font-weight:600;">1. how many classes?</label>
-        <input type="number" id="classCount" class="input-f" value="5" min="1" max="15">
+        <div class="grid" id="seatGrid"></div>
 
-        <label style="display:block; text-align:left; margin-bottom:5px; font-weight:600;">2. google drive folder link</label>
-        <input type="text" id="driveLink" class="input-f" placeholder="Paste Drive Link...">
+        <div id="setupPanel" style="display:none; position:absolute; inset:0; background:white; z-index:100; padding:60px; flex-direction:column; align-items:center; border-radius:50px;">
+            <h1 style="color:var(--p); font-size:2.5rem;">Setup</h1>
+            <input type="text" id="driveLink" class="input-f" style="width:80%; margin-bottom:10px;" placeholder="Drive Link..." onchange="saveSettings()">
+            
+            <div style="margin-bottom:20px;">
+                <label>read only </label>
+                <input type="number" id="wordLimit" value="0" class="input-f" style="width:60px;">
+                <span> words (0 = all)</span>
+            </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:10px;">
-            <div>
-                <label style="display:block; text-align:left; margin-bottom:5px; font-weight:600;">3. student names (excel)</label>
-                <input type="file" id="namesFile" class="input-f" accept=".xlsx, .xls">
-            </div>
-            <div>
-                <label style="display:block; text-align:left; margin-bottom:5px; font-weight:600;">4. words/sentences (excel)</label>
-                <input type="file" id="wordsFile" class="input-f" accept=".xlsx, .xls, .txt">
-            </div>
+            <input type="file" id="fileIn" class="input-f" style="width:80%; margin-bottom:20px;">
+            <button class="btn" style="background:var(--p); width:auto; padding:15px 50px;" onclick="toggleSetup(false)">Save & Close</button>
         </div>
-
-        <button class="btn" style="background:var(--s);" onclick="confirmConfig()">Confirm & Start</button>
-        <button onclick="closeConfig()" style="margin-top:20px; background:none; border:none; color:#b2bec3; cursor:pointer;">cancel</button>
     </div>
 </div>
 
 <div id="modal">
     <div class="modal-c">
-        <h2 id="sLabel" style="margin:0; font-size:2rem; opacity:0.3;">Seat 1</h2>
-        <div id="wordBox" style="font-size: 5vw; line-height:1.2; color: var(--e); margin: 50px 0; font-weight: 700;">ready?</div>
+        <h2 id="sLabel" style="margin:0; opacity:0.3;">Seat 1</h2>
+        <div id="wordBox" style="font-size: 4vw; line-height:1.2; color: var(--e); margin: 40px 0; font-weight: 700;">ready?</div>
         <button id="startBtn" class="btn" style="background:var(--s);" onclick="start()">Start Recording</button>
         <button id="stopBtn" class="btn" style="background:var(--e); display:none;" onclick="stop()">Stop & Save</button>
-        <div id="status" style="margin-top:30px; font-size:1.5rem; font-weight:600; color:var(--p);">...</div>
-        <button onclick="closeModal()" style="margin-top:40px; background:none; border:none; color:#b2bec3; cursor:pointer; font-size:1.2rem;">cancel</button>
+        <div id="status" style="margin-top:20px; font-weight:600; color:var(--p);">...</div>
+        <button onclick="closeModal()" style="margin-top:20px; background:none; border:none; color:#b2bec3; cursor:pointer;">cancel</button>
     </div>
 </div>
 
 <script>
     const webAppURL = 'https://script.google.com/macros/s/AKfycbwwq6P2mA46zGXVobJmcnpNRkFRzHRcyAhqY9aowwdjoQHkfMop203cHHt0Dzlq1U43/exec';
-    const ding = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-    let activeG, recorder, chunks = [], curSeat, curEl, stream;
     
-    let wordsData = {}; // Stores words per grade
-    let studentNames = {}; // Stores names per grade
+    // Requirement 4: Custom Audio
+    const sfxClick = new Audio('click.mp3');
+    const sfxHover = new Audio('hover.mp3');
+    const sfxDing = new Audio('ding.mp3');
+
+    let activeG, recorder, chunks = [], curSeat, curEl, stream;
+    let words = { "1":[], "2":[], "3":[], "4":[], "5":[], "6":[] };
 
     lucide.createIcons();
 
-    function promptConfig(g) {
-        activeG = g;
-        document.getElementById('confG').innerText = g;
-        document.getElementById('configModal').style.display = 'flex';
-        
-        // Pre-fill drive link if exists
-        if(localStorage.getItem('wynn_drive')) {
-            document.getElementById('driveLink').value = localStorage.getItem('wynn_drive');
+    // Requirement 1: Fullscreen Logic
+    function toggleFS() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            document.getElementById('fsIcon').setAttribute('data-lucide', 'minimize');
+        } else {
+            document.exitFullscreen();
+            document.getElementById('fsIcon').setAttribute('data-lucide', 'maximize');
         }
+        lucide.createIcons();
     }
 
-    function closeConfig() {
-        document.getElementById('configModal').style.display = 'none';
+    // Requirement 4: Sfx triggers
+    function playClick() { sfxClick.play(); }
+    function playHover() { sfxHover.play(); }
+
+    // Requirement 7: Change Color Palette
+    function updateTheme(color) {
+        document.documentElement.style.setProperty('--p', color);
+        localStorage.setItem('wynn_theme', color);
     }
 
-    // Handle File Uploads for Names and Words
-    async function processExcel(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const data = e.target.result;
-                const workbook = XLSX.read(data, {type: 'binary'});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(sheet, {header: 1}).flat();
-                resolve(json.filter(item => item && item.toString().trim() != ""));
-            };
-            reader.readAsBinaryString(file);
-        });
+    window.onload = () => {
+        if(localStorage.getItem('wynn_drive')) document.getElementById('driveLink').value = localStorage.getItem('wynn_drive');
+        if(localStorage.getItem('wynn_theme')) updateTheme(localStorage.getItem('wynn_theme'));
+    };
+
+    function saveSettings() {
+        localStorage.setItem('wynn_drive', document.getElementById('driveLink').value);
+        localStorage.setItem('wynn_last_c', document.getElementById('classSel').value);
     }
 
-    async function confirmConfig() {
-        const classCount = document.getElementById('classCount').value;
-        const driveLink = document.getElementById('driveLink').value;
-        const nFile = document.getElementById('namesFile').files[0];
-        const wFile = document.getElementById('wordsFile').files[0];
-
-        if (nFile) studentNames[activeG] = await processExcel(nFile);
-        if (wFile) wordsData[activeG] = await processExcel(wFile);
-        
-        localStorage.setItem('wynn_drive', driveLink);
-        
-        launch(activeG, classCount);
-        closeConfig();
-    }
-
-    function launch(g, classCount) {
+    function launch(g) {
+        playClick();
         activeG = g;
         document.getElementById('lobby').style.display = 'none';
         document.getElementById('main').style.display = 'flex';
         document.getElementById('gLabel').innerText = "grade " + g;
         
-        const colors = { 1: '#ff7675', 2: '#fdcb6e', 3: '#0984e3', 4: '#6c5ce7', 5: '#2d3436', 6: '#d63031' };
-        document.documentElement.style.setProperty('--p', colors[g] || '#6c5ce7');
-
         const sel = document.getElementById('classSel');
         sel.innerHTML = '';
-        for(let i=1; i<=classCount; i++) {
-            let v = g + (i < 10 ? "0"+i : i);
+        [1,2,3,4,5].forEach(i => {
+            let v = g + "0" + i;
             let o = document.createElement('option'); o.value = v; o.innerText = v;
+            if(v === localStorage.getItem('wynn_last_c')) o.selected = true;
             sel.appendChild(o);
-        }
+        });
 
         const grid = document.getElementById('seatGrid');
         grid.innerHTML = '';
-        const totalSeats = studentNames[g] ? studentNames[g].length : 30;
-
-        for(let i=1; i<=totalSeats; i++) {
+        for(let i=1; i<=30; i++) {
             let s = document.createElement('div');
-            s.className = 'seat';
-            let name = studentNames[g] ? studentNames[g][i-1] : "";
-            s.innerHTML = `<span class="seat-num">${i}</span><small>${name}</small>`;
-            s.onclick = () => openModal(i, s, name);
+            s.className = 'seat'; s.innerText = i;
+            s.onclick = () => openModal(i, s);
             grid.appendChild(s);
         }
     }
 
-    function openModal(n, el, name) {
+    function toggleSetup(s) { playClick(); document.getElementById('setupPanel').style.display = s ? 'flex' : 'none'; }
+
+    document.getElementById('fileIn').addEventListener('change', function(e) {
+        const f = e.target.files[0];
+        const r = new FileReader();
+        r.onload = (evt) => {
+            let list = (f.name.match(/\.xls/)) ? 
+                XLSX.utils.sheet_to_json(XLSX.read(evt.target.result, {type:'binary'}).Sheets[XLSX.read(evt.target.result, {type:'binary'}).SheetNames[0]], {header:1}).flat() :
+                evt.target.result.split(/\n/).map(s => s.trim());
+            
+            // Requirement 3: "Read All" vs "Read ___ words"
+            let limit = parseInt(document.getElementById('wordLimit').value);
+            let processed = list.filter(s => s && s.length > 0);
+            words[activeG] = (limit > 0) ? processed.slice(0, limit) : processed;
+            
+            alert("Success! " + words[activeG].length + " items loaded.");
+        };
+        if(f.name.match(/\.xls/)) r.readAsBinaryString(f); else r.readAsText(f);
+    });
+
+    function openModal(n, el) {
+        playClick();
         curSeat = n; curEl = el;
-        document.getElementById('sLabel').innerText = name ? `student: ${name}` : `seat ${n}`;
-        
-        const gradeWords = wordsData[activeG] || [];
-        document.getElementById('wordBox').innerText = gradeWords[(n-1) % gradeWords.length] || "ready?";
-        
+        document.getElementById('sLabel').innerText = "seat " + n;
+        document.getElementById('wordBox').innerText = words[activeG][(n-1) % words[activeG].length] || "ready?";
         document.getElementById('modal').style.display = 'flex';
         document.getElementById('status').innerText = "press start";
     }
 
     async function start() {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            recorder = new MediaRecorder(stream, { audioBitsPerSecond: 24000 });
-            chunks = [];
-            recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = upload;
-            recorder.start();
-            document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('stopBtn').style.display = 'block';
-            document.getElementById('status').innerText = "recording...";
-        } catch (err) { alert("Mic access denied"); }
+        playClick();
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        recorder = new MediaRecorder(stream, { audioBitsPerSecond: 24000 });
+        chunks = [];
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = upload;
+        recorder.start();
+        document.getElementById('startBtn').style.display = 'none';
+        document.getElementById('stopBtn').style.display = 'block';
+        document.getElementById('status').innerText = "recording...";
     }
 
     function stop() {
+        playClick();
         recorder.stop();
         stream.getTracks().forEach(t => t.stop());
         document.getElementById('status').innerText = "saving fast...";
@@ -327,12 +278,11 @@
             params.append('className', document.getElementById('classSel').value);
             params.append('filename', `Seat${curSeat}.webm`);
             params.append('folderId', id);
-            
             fetch(webAppURL, { method: 'POST', body: params.toString(), headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, mode: 'no-cors' })
             .then(() => {
-                ding.play();
+                sfxDing.play(); // Requirement 4: Ding on save
                 curEl.classList.add('done');
-                curEl.querySelector('.seat-num').innerText = "✓";
+                curEl.innerText = "✓";
                 closeModal();
             });
         };
@@ -342,10 +292,6 @@
         document.getElementById('modal').style.display = 'none';
         document.getElementById('startBtn').style.display = 'block';
         document.getElementById('stopBtn').style.display = 'none';
-    }
-
-    function saveSettings() {
-        localStorage.setItem('wynn_last_c', document.getElementById('classSel').value);
     }
 </script>
 </body>
