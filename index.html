@@ -15,8 +15,9 @@
         
         body { 
             font-family: 'Fredoka', "Comic Sans MS", cursive; 
-            background: url('bg.jpg') center/cover no-repeat fixed; /* Requirement: bg.jpg */
-            margin: 0; text-transform: lowercase; overflow: hidden; color: #2d3436;
+            background: url('bg.jpg') center/cover no-repeat fixed; 
+            margin: 0; text-transform: none; /* Changed to none to allow exact case for "Recording Studio" */
+            overflow: hidden; color: #2d3436;
         }
 
         .app { 
@@ -35,7 +36,6 @@
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Requirement: 3 columns, 2 rows */
         #lobby { 
             display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr);
             gap: 25px; padding: 100px 60px 60px 60px; box-sizing: border-box;
@@ -81,13 +81,14 @@
 
 <div class="app">
     <div id="lobby" class="view" style="display: grid;">
-        <h1 style="position:absolute; top:20px; left:50%; transform:translateX(-50%); font-size:2rem; color:var(--p); opacity:0.6;">recording studio</h1>
-        <div class="grade-pill" onclick="promptConfig(1)" onmouseover="playHover()"><h2>grade 1</h2></div>
-        <div class="grade-pill" onclick="promptConfig(2)" onmouseover="playHover()"><h2>grade 2</h2></div>
-        <div class="grade-pill" onclick="promptConfig(3)" onmouseover="playHover()"><h2>grade 3</h2></div>
-        <div class="grade-pill" onclick="promptConfig(4)" onmouseover="playHover()"><h2>grade 4</h2></div>
-        <div class="grade-pill" onclick="promptConfig(5)" onmouseover="playHover()"><h2>grade 5</h2></div>
-        <div class="grade-pill" onclick="promptConfig(6)" onmouseover="playHover()"><h2>grade 6</h2></div>
+        <h1 style="position:absolute; top:20px; left:50%; transform:translateX(-50%); font-size:2rem; color:var(--p); opacity:0.6;">Recording Studio</h1>
+        
+        <div class="grade-pill" onclick="promptConfig(1)" onmouseover="playHover()"><h2>Grade 1</h2></div>
+        <div class="grade-pill" onclick="promptConfig(2)" onmouseover="playHover()"><h2>Grade 2</h2></div>
+        <div class="grade-pill" onclick="promptConfig(3)" onmouseover="playHover()"><h2>Grade 3</h2></div>
+        <div class="grade-pill" onclick="promptConfig(4)" onmouseover="playHover()"><h2>Grade 4</h2></div>
+        <div class="grade-pill" onclick="promptConfig(5)" onmouseover="playHover()"><h2>Grade 5</h2></div>
+        <div class="grade-pill" onclick="promptConfig(6)" onmouseover="playHover()"><h2>Grade 6</h2></div>
     </div>
 
     <div id="main" class="view">
@@ -106,31 +107,31 @@
 
 <div id="configModal">
     <div class="modal-c">
-        <h2 style="color:var(--p); font-size:2.5rem; margin-bottom:20px;">grade <span id="confG"></span> setup</h2>
+        <h2 style="color:var(--p); font-size:2.5rem; margin-bottom:20px;">Grade <span id="confG"></span> Setup</h2>
         <div style="text-align:left; margin-bottom:15px;">
-            <label style="font-weight:600;">1. how many classes?</label>
+            <label style="font-weight:600;">1. How many classes?</label>
             <input type="number" id="classCount" class="input-f" value="5" min="1">
         </div>
         <div style="text-align:left; margin-bottom:15px;">
-            <label style="font-weight:600;">2. google drive folder link</label>
+            <label style="font-weight:600;">2. Google Drive folder link</label>
             <input type="text" id="driveLink" class="input-f" placeholder="Paste Link Here...">
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
             <div style="text-align:left;">
-                <label style="font-weight:600;">3. student names (excel)</label>
+                <label style="font-weight:600;">3. Student names (Excel)</label>
                 <input type="file" id="namesFile" class="input-f" accept=".xlsx, .xls">
             </div>
             <div style="text-align:left;">
-                <label style="font-weight:600;">4. words/sentences (excel)</label>
+                <label style="font-weight:600;">4. Words/sentences (Excel)</label>
                 <input type="file" id="wordsFile" class="input-f" accept=".xlsx, .xls, .txt">
             </div>
         </div>
         <div style="margin: 20px 0; text-align:left;">
-            <label style="font-weight:600;">read limit (0 = read all)</label>
+            <label style="font-weight:600;">Read limit (0 = read all)</label>
             <input type="number" id="wordLimit" value="0" class="input-f" style="width:100px;">
         </div>
         <button class="btn" style="background:var(--s);" onclick="confirmConfig()">Confirm & Start</button>
-        <button onclick="closeConfig()" style="margin-top:15px; background:none; border:none; color:#b2bec3; cursor:pointer;">cancel</button>
+        <button onclick="closeConfig()" style="margin-top:15px; background:none; border:none; color:#b2bec3; cursor:pointer;">Cancel</button>
     </div>
 </div>
 
@@ -141,13 +142,12 @@
         <button id="startBtn" class="btn" style="background:var(--s);" onclick="start()">Start Recording</button>
         <button id="stopBtn" class="btn" style="background:var(--e); display:none;" onclick="stop()">Stop & Save</button>
         <div id="status" style="margin-top:20px; font-weight:600; color:var(--p);">...</div>
-        <button onclick="closeModal()" style="margin-top:30px; background:none; border:none; color:#b2bec3; cursor:pointer;">cancel</button>
+        <button onclick="closeModal()" style="margin-top:30px; background:none; border:none; color:#b2bec3; cursor:pointer;">Cancel</button>
     </div>
 </div>
 
 <script>
     const webAppURL = 'https://script.google.com/macros/s/AKfycbwwq6P2mA46zGXVobJmcnpNRkFRzHRcyAhqY9aowwdjoQHkfMop203cHHt0Dzlq1U43/exec';
-    // Requirement: click.mp3, hover.mp3, and ding.mp3
     const sfxClick = new Audio('click.mp3');
     const sfxHover = new Audio('hover.mp3');
     const sfxDing = new Audio('ding.mp3');
@@ -198,6 +198,7 @@
                 const data = e.target.result;
                 const workbook = XLSX.read(data, {type: 'binary'});
                 const list = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header:1}).flat();
+                // Preservation of exact letter case for files [cite: 5, 59]
                 resolve(list.filter(item => item && item.toString().trim() !== ""));
             };
             reader.readAsBinaryString(file);
@@ -226,7 +227,7 @@
     function launch(g, classCount) {
         document.getElementById('lobby').style.display = 'none';
         document.getElementById('main').style.display = 'flex';
-        document.getElementById('gLabel').innerText = "grade " + g;
+        document.getElementById('gLabel').innerText = "Grade " + g;
         
         const sel = document.getElementById('classSel');
         sel.innerHTML = '';
@@ -253,11 +254,11 @@
     function openModal(n, el, name) {
         playClick();
         curSeat = n; curEl = el;
-        document.getElementById('sLabel').innerText = name ? name : "seat " + n;
+        document.getElementById('sLabel').innerText = name ? name : "Seat " + n;
         const list = wordsData[activeG] || [];
         document.getElementById('wordBox').innerText = list[(n-1) % list.length] || "ready?";
         document.getElementById('modal').style.display = 'flex';
-        document.getElementById('status').innerText = "press start";
+        document.getElementById('status').innerText = "Press Start";
     }
 
     async function start() {
@@ -270,14 +271,14 @@
         recorder.start();
         document.getElementById('startBtn').style.display = 'none';
         document.getElementById('stopBtn').style.display = 'block';
-        document.getElementById('status').innerText = "recording...";
+        document.getElementById('status').innerText = "Recording...";
     }
 
     function stop() {
         playClick();
         recorder.stop();
         stream.getTracks().forEach(t => t.stop());
-        document.getElementById('status').innerText = "saving fast...";
+        document.getElementById('status').innerText = "Saving Fast...";
     }
 
     function upload() {
