@@ -16,7 +16,7 @@
         body { 
             font-family: 'Fredoka', "Comic Sans MS", cursive; 
             background: url('bg.jpg') center/cover no-repeat fixed; 
-            margin: 0; text-transform: none; /* Changed to none to allow exact case for "Recording Studio" */
+            margin: 0; text-transform: none; 
             overflow: hidden; color: #2d3436;
         }
 
@@ -72,7 +72,25 @@
         .fs-toggle { position: absolute; top: 20px; right: 20px; z-index: 100; cursor: pointer; color: var(--p); opacity: 0.5; }
 
         #modal, #configModal { display: none; position: fixed; inset: 0; background: rgba(45, 52, 54, 0.4); backdrop-filter: blur(12px); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-c { background: white; width: 85%; max-width: 800px; padding: 50px; border-radius: 60px; text-align: center; box-shadow: 0 40px 100px rgba(0,0,0,0.2); }
+        .modal-c { 
+            background: white; width: 85%; max-width: 800px; padding: 40px; border-radius: 60px; text-align: center; 
+            box-shadow: 0 40px 100px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;
+        }
+
+        /* AUTO-SCALING TEXT FOR SMARTBOARDS/IPADS */
+        #wordBox { 
+            font-size: clamp(2rem, 7vw, 4.5rem); 
+            line-height: 1.2; 
+            color: var(--e); 
+            margin: 30px auto; 
+            font-weight: 700;
+            max-width: 95%;
+            word-wrap: break-word;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -138,7 +156,7 @@
 <div id="modal">
     <div class="modal-c">
         <h2 id="sLabel" style="margin:0; opacity:0.3;">Seat 1</h2>
-        <div id="wordBox" style="font-size: 5vw; line-height:1.2; color: var(--e); margin: 40px 0; font-weight: 700;">ready?</div>
+        <div id="wordBox">ready?</div>
         <button id="startBtn" class="btn" style="background:var(--s);" onclick="start()">Start Recording</button>
         <button id="stopBtn" class="btn" style="background:var(--e); display:none;" onclick="stop()">Stop & Save</button>
         <div id="status" style="margin-top:20px; font-weight:600; color:var(--p);">...</div>
@@ -198,7 +216,6 @@
                 const data = e.target.result;
                 const workbook = XLSX.read(data, {type: 'binary'});
                 const list = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header:1}).flat();
-                // Preservation of exact letter case for files [cite: 5, 59]
                 resolve(list.filter(item => item && item.toString().trim() !== ""));
             };
             reader.readAsBinaryString(file);
@@ -214,6 +231,8 @@
         const limit = parseInt(document.getElementById('wordLimit').value);
 
         if (nFile) namesData[activeG] = await parseFile(nFile);
+        
+        // FIXED READ LIMIT LOGIC
         if (wFile) {
             let fullList = await parseFile(wFile);
             wordsData[activeG] = (limit > 0) ? fullList.slice(0, limit) : fullList;
@@ -256,7 +275,10 @@
         curSeat = n; curEl = el;
         document.getElementById('sLabel').innerText = name ? name : "Seat " + n;
         const list = wordsData[activeG] || [];
+        
+        // Display word/sentence based on seat index, wrapping around if list is shorter than seats
         document.getElementById('wordBox').innerText = list[(n-1) % list.length] || "ready?";
+        
         document.getElementById('modal').style.display = 'flex';
         document.getElementById('status').innerText = "Press Start";
     }
