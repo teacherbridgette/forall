@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wynn Studio | Persistent</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wynn Studio | Final</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -11,34 +11,58 @@
     <style>
         :root { --p: #6c5ce7; --s: #00b894; --e: #ff7675; --glass: rgba(255, 255, 255, 0.9); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Fredoka', Arial, sans-serif; margin: 0; text-transform: lowercase; overflow: hidden; height: 100vh; background: #1a1a1a url('bg.jpg') center/cover no-repeat fixed; }
-
-        .fs-toggle { position: fixed; top: 20px; right: 20px; background: var(--glass); border: none; width: 55px; height: 55px; border-radius: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2000; color: var(--p); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
         
-        .view { width: 96%; height: 80vh; background: var(--glass); backdrop-filter: blur(25px); border-radius: 50px; display: none; flex-direction: column; margin: 10vh auto; box-shadow: 0 40px 100px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.4); }
+        body { 
+            font-family: 'Fredoka', Arial, sans-serif; margin: 0; text-transform: lowercase; 
+            overflow: hidden; height: 100vh; 
+            background: #1a1a1a url('bg.jpg') center/cover no-repeat fixed; 
+        }
 
-        #lobby { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 25px; padding: 0 50px; overflow-x: auto; }
-        #lobby::-webkit-scrollbar { display: none; }
-        .grade-pill { flex: 0 0 auto; background: white; padding: 50px 40px; border-radius: 40px; cursor: pointer; transition: 0.3s; min-width: 220px; text-align: center; }
-        .grade-pill:hover { transform: translateY(-10px); border: 4px solid var(--p); }
-        .grade-pill h2 { font-size: 2.2rem; margin: 0; color: var(--p); font-weight: 700; }
+        .fs-toggle { 
+            position: fixed; top: 20px; right: 20px; background: var(--glass); 
+            border: none; width: 55px; height: 55px; border-radius: 15px; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; z-index: 2000; color: var(--p); 
+        }
 
-        .navbar { padding: 25px 45px; display: flex; justify-content: space-between; align-items: center; }
-        .grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; padding: 30px; overflow-y: auto; }
-        .seat { background: white; border-radius: 20px; padding: 25px 15px; text-align: center; cursor: pointer; border: 2px solid #eee; transition: 0.2s; font-weight: 700; font-size: 1.2rem; color: #444; position: relative; }
+        .view { 
+            width: 96%; height: 82vh; background: var(--glass); 
+            backdrop-filter: blur(20px); border-radius: 50px; 
+            display: none; flex-direction: column; margin: 9vh auto; 
+            box-shadow: 0 40px 100px rgba(0,0,0,0.3);
+        }
+
+        /* 6 PILLS HORIZONTAL - NO SCROLL */
+        #lobby { 
+            display: flex; flex-direction: row; align-items: center; 
+            justify-content: space-evenly; padding: 0 20px; 
+        }
+
+        .grade-pill { 
+            background: white; padding: 40px 20px; border-radius: 35px; 
+            cursor: pointer; transition: 0.3s; width: 15%; text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 4px solid transparent;
+        }
+        .grade-pill:hover { transform: translateY(-10px); border-color: var(--p); }
+        .grade-pill h2 { font-size: 1.8rem; margin: 0; color: var(--p); font-weight: 700; }
+
+        /* GRID */
+        .navbar { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; padding: 25px; overflow-y: auto; }
+        .seat { background: white; border-radius: 18px; padding: 20px; text-align: center; cursor: pointer; border: 2px solid #eee; font-weight: 700; }
         .seat.done { background: var(--s); color: white; border-color: var(--s); }
-        .seat.done::after { content: '✓'; position: absolute; top: 5px; right: 10px; font-size: 0.8rem; }
 
+        /* MODALS */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; }
-        .modal-c { background: white; width: 90%; max-width: 550px; padding: 40px; border-radius: 50px; text-align: center; }
-        .input-f { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid #eee; font-size: 1rem; margin: 8px 0; outline: none; font-family: inherit; }
-        .btn { width: 100%; padding: 20px; border-radius: 25px; border: none; font-size: 1.8rem; font-weight: 700; color: white; cursor: pointer; margin-top: 15px; }
+        .modal-c { background: white; width: 90%; max-width: 500px; padding: 35px; border-radius: 45px; text-align: center; }
+        .input-f { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #eee; font-size: 1rem; margin: 8px 0; outline: none; font-family: inherit; }
+        .btn { width: 100%; padding: 18px; border-radius: 20px; border: none; font-size: 1.6rem; font-weight: 700; color: white; cursor: pointer; margin-top: 10px; }
         
-        .mode-row { display: flex; gap: 10px; margin-top: 5px; }
-        .mode-btn { flex: 1; padding: 15px; border-radius: 15px; border: 2px solid #eee; background: white; cursor: pointer; font-weight: 700; }
+        .mode-row { display: flex; gap: 8px; margin-top: 5px; }
+        .mode-btn { flex: 1; padding: 12px; border-radius: 12px; border: 2px solid #eee; background: white; cursor: pointer; font-weight: 700; }
         .mode-btn.active { background: var(--p); color: white; }
 
-        .rec-pulse { position: absolute; inset: 0; border: 10px solid var(--e); border-radius: 50px; animation: pulse 1.5s infinite; display: none; pointer-events: none; }
+        .rec-pulse { position: absolute; inset: 0; border: 8px solid var(--e); border-radius: 45px; animation: pulse 1.5s infinite; display: none; pointer-events: none; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
     </style>
 </head>
@@ -57,54 +81,47 @@
 
 <div id="main" class="view">
     <div class="navbar">
-        <button onclick="location.reload()" style="border:none; background:none; cursor:pointer;"><i data-lucide="chevron-left" size="40"></i></button>
+        <button onclick="location.reload()" style="border:none; background:none; cursor:pointer;"><i data-lucide="chevron-left" size="32"></i></button>
         <h2 id="classLabel" style="color:var(--p); margin:0;"></h2>
-        <button onclick="clearClassCache()" style="border:none; background:none; color:var(--e); cursor:pointer; font-size:0.8rem; font-weight:700;">reset class</button>
+        <button onclick="clearClassCache()" style="border:none; background:none; color:var(--e); cursor:pointer; font-weight:700;">reset</button>
     </div>
     <div class="grid" id="seatGrid"></div>
 </div>
 
 <div id="setupModal" class="modal">
     <div class="modal-c">
-        <h2 style="color:var(--p); margin-top:0;">setup class</h2>
+        <h2 style="color:var(--p); margin:0 0 15px 0;">class setup</h2>
         <input type="text" id="driveId" class="input-f" placeholder="drive folder id">
-        
-        <div style="text-align:left; font-size:0.9rem; color:var(--p); font-weight:700; margin-top:10px;">names (excel):</div>
+        <div style="text-align:left; font-size:0.8rem; font-weight:700; color:var(--p);">students (excel):</div>
         <input type="file" id="excelNames" class="input-f" accept=".xlsx">
-        
-        <div style="text-align:left; font-size:0.9rem; color:var(--p); font-weight:700; margin-top:10px;">words (txt/excel):</div>
+        <div style="text-align:left; font-size:0.8rem; font-weight:700; color:var(--p);">words (txt/excel):</div>
         <input type="file" id="wordFile" class="input-f" accept=".txt,.xlsx">
-        
-        <div style="text-align:left; margin-top:15px;">
-            <div class="mode-row">
-                <button id="modeAll" class="mode-btn active" onclick="setMode('all')">read all</button>
-                <button id="modeLimit" class="mode-btn" onclick="setMode('limit')">random limit</button>
-            </div>
-            <input type="number" id="limitCount" class="input-f" style="display:none;" placeholder="how many words per student?">
+        <div class="mode-row">
+            <button id="modeAll" class="mode-btn active" onclick="setMode('all')">all</button>
+            <button id="modeLimit" class="mode-btn" onclick="setMode('limit')">limit</button>
         </div>
-        <button class="btn" style="background:var(--p)" onclick="processSetup()">start studio ✓</button>
+        <input type="number" id="limitCount" class="input-f" style="display:none;" placeholder="how many words?">
+        <button class="btn" style="background:var(--p)" onclick="processSetup()">launch ✓</button>
     </div>
 </div>
 
 <div id="recModal" class="modal">
-    <div class="modal-c" style="position:relative; max-width: 800px;">
+    <div class="modal-c" style="position:relative; max-width: 700px;">
         <div class="rec-pulse" id="pulseEl"></div>
         <h2 id="sName" style="opacity:0.4; margin:0;"></h2>
-        <div id="wordBox" style="font-size: 3rem; font-weight:700; margin: 40px 0; line-height:1.2;"></div>
+        <div id="wordBox" style="font-size: 2.8rem; font-weight:700; margin: 30px 0;"></div>
         <button id="startBtn" class="btn" style="background:var(--s);" onclick="runStart()">START</button>
-        <button id="stopBtn" class="btn" style="background:var(--e); display:none;" onclick="runStop()">STOP & SAVE</button>
-        <div id="statusTxt" style="font-size:1.5rem; font-weight:700; color:var(--p); margin-top:20px;"></div>
-        <button onclick="closeRec()" style="margin-top:20px; background:none; border:none; color:#bbb; cursor:pointer;">cancel</button>
+        <button id="stopBtn" class="btn" style="background:var(--e); display:none;" onclick="runStop()">UPLOAD</button>
+        <div id="statusTxt" style="font-size:1.2rem; font-weight:700; color:var(--p); margin-top:15px;"></div>
+        <button onclick="closeRec()" style="margin-top:15px; background:none; border:none; color:#bbb; cursor:pointer;">cancel</button>
     </div>
 </div>
 
 <script>
     const webAppURL = 'YOUR_APPS_SCRIPT_URL';
     const sfxDing = new Audio('ding.mp3');
-    let activeG, activeStu, activeStuEl, recorder, chunks = [], stream;
-    let mode = 'all', studentList = [], masterWords = [];
+    let activeG, activeStu, activeStuEl, recorder, chunks = [], stream, mode = 'all', studentList = [], masterWords = [];
 
-    // Load Drive ID from cache on boot
     window.onload = () => {
         const savedDrive = localStorage.getItem('wynn_drive_id');
         if (savedDrive) document.getElementById('driveId').value = savedDrive;
@@ -121,23 +138,22 @@
     function openSetup(g) { activeG = g; document.getElementById('setupModal').style.display = 'flex'; }
 
     async function processSetup() {
-        const driveId = document.getElementById('driveId').value;
-        localStorage.setItem('wynn_drive_id', driveId); // Cache Folder ID
-
-        const wordFile = document.getElementById('wordFile').files[0];
-        if (wordFile) {
-            if (wordFile.name.endsWith('.xlsx')) {
-                const data = await wordFile.arrayBuffer();
-                masterWords = XLSX.utils.sheet_to_json(XLSX.read(data).Sheets[XLSX.read(data).SheetNames[0]], {header:1}).flat().filter(c => c);
+        localStorage.setItem('wynn_drive_id', document.getElementById('driveId').value);
+        
+        const wFile = document.getElementById('wordFile').files[0];
+        if (wFile) {
+            if (wFile.name.endsWith('.xlsx')) {
+                const d = await wFile.arrayBuffer();
+                masterWords = XLSX.utils.sheet_to_json(XLSX.read(d).Sheets[XLSX.read(d).SheetNames[0]], {header:1}).flat().filter(c => c);
             } else {
-                masterWords = (await wordFile.text()).split('\n').map(s => s.trim()).filter(s => s.length > 0);
+                masterWords = (await wFile.text()).split('\n').map(s => s.trim()).filter(s => s.length > 0);
             }
         }
 
-        const nameFile = document.getElementById('excelNames').files[0];
-        if (nameFile) {
-            const data = await nameFile.arrayBuffer();
-            studentList = XLSX.utils.sheet_to_json(XLSX.read(data).Sheets[XLSX.read(data).SheetNames[0]], {header:1}).flat().filter(n => n);
+        const nFile = document.getElementById('excelNames').files[0];
+        if (nFile) {
+            const d = await nFile.arrayBuffer();
+            studentList = XLSX.utils.sheet_to_json(XLSX.read(d).Sheets[XLSX.read(d).SheetNames[0]], {header:1}).flat().filter(n => n);
         } else {
             studentList = Array.from({length: 21}, (_, i) => i + 1);
         }
@@ -150,16 +166,15 @@
         document.getElementById('main').style.display = 'flex';
         document.getElementById('classLabel').innerText = `grade ${activeG}`;
         
-        const cacheKey = `wynn_done_g${activeG}_${localStorage.getItem('wynn_drive_id')}`;
-        const doneList = JSON.parse(localStorage.getItem(cacheKey) || "[]");
+        const key = `wynn_done_g${activeG}`;
+        const doneList = JSON.parse(localStorage.getItem(key) || "[]");
 
         const grid = document.getElementById('seatGrid');
         grid.innerHTML = '';
         studentList.forEach((name) => {
             const div = document.createElement('div');
-            div.className = 'seat';
+            div.className = 'seat' + (doneList.includes(String(name)) ? ' done' : '');
             div.innerText = name;
-            if (doneList.includes(String(name))) div.classList.add('done');
             div.onclick = () => openRec(name, div);
             grid.appendChild(div);
         });
@@ -168,12 +183,12 @@
     function openRec(name, el) {
         activeStu = name; activeStuEl = el;
         document.getElementById('sName').innerText = `student: ${name}`;
-        let displayWords = [...masterWords];
+        let words = [...masterWords];
         if (mode === 'limit') {
             const count = parseInt(document.getElementById('limitCount').value) || 5;
-            displayWords = displayWords.sort(() => 0.5 - Math.random()).slice(0, count);
+            words = words.sort(() => 0.5 - Math.random()).slice(0, count);
         }
-        document.getElementById('wordBox').innerText = displayWords.length ? displayWords.join(" • ") : "no words loaded";
+        document.getElementById('wordBox').innerText = words.length ? words.join(" • ") : "no words";
         document.getElementById('recModal').style.display = 'flex';
     }
 
@@ -210,24 +225,19 @@
             fetch(webAppURL, { method: 'POST', body: params.toString(), mode: 'no-cors' })
             .then(() => {
                 sfxDing.play().catch(()=>{});
-                markAsDone(activeStu);
+                const key = `wynn_done_g${activeG}`;
+                let list = JSON.parse(localStorage.getItem(key) || "[]");
+                if(!list.includes(String(activeStu))) list.push(String(activeStu));
+                localStorage.setItem(key, JSON.stringify(list));
                 activeStuEl.classList.add('done');
                 closeRec();
             });
         };
     }
 
-    function markAsDone(name) {
-        const cacheKey = `wynn_done_g${activeG}_${localStorage.getItem('wynn_drive_id')}`;
-        let doneList = JSON.parse(localStorage.getItem(cacheKey) || "[]");
-        if (!doneList.includes(String(name))) doneList.push(String(name));
-        localStorage.setItem(cacheKey, JSON.stringify(doneList));
-    }
-
     function clearClassCache() {
-        if(confirm("Clear all 'Done' checkmarks for this class?")) {
-            const cacheKey = `wynn_done_g${activeG}_${localStorage.getItem('wynn_drive_id')}`;
-            localStorage.removeItem(cacheKey);
+        if(confirm("Reset checkmarks?")) {
+            localStorage.removeItem(`wynn_done_g${activeG}`);
             renderGrid();
         }
     }
