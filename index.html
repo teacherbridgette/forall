@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wynn Studio | Original Script Sync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wynn Studio | Persistent Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -11,57 +11,35 @@
     <style>
         :root { --p: #6c5ce7; --s: #00b894; --e: #ff7675; --glass: rgba(255, 255, 255, 0.92); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Fredoka', Arial, sans-serif; margin: 0; text-transform: lowercase; overflow: hidden; height: 100vh; background: #1a1a1a url('bg.jpg') center/cover no-repeat fixed; }
+
+        .fs-toggle { position: fixed; top: 20px; right: 20px; background: var(--glass); border: none; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2000; color: var(--p); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         
-        body { 
-            font-family: 'Fredoka', Arial, sans-serif; margin: 0; text-transform: lowercase; 
-            overflow: hidden; height: 100vh; 
-            background: #1a1a1a url('bg.jpg') center/cover no-repeat fixed; 
-        }
-
-        .fs-toggle { 
-            position: fixed; top: 20px; right: 20px; background: var(--glass); 
-            border: none; width: 50px; height: 50px; border-radius: 12px; 
-            display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; z-index: 2000; color: var(--p); 
-        }
-
-        .view { 
-            width: 94%; height: 80vh; background: var(--glass); 
-            backdrop-filter: blur(20px); border-radius: 40px; 
-            display: none; flex-direction: column; margin: 10vh auto; 
-            box-shadow: 0 30px 80px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.3);
-        }
+        .view { width: 94%; height: 82vh; background: var(--glass); backdrop-filter: blur(15px); border-radius: 40px; display: none; flex-direction: column; margin: 9vh auto; box-shadow: 0 30px 100px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3); }
 
         /* 6 PILLS HORIZONTAL */
-        #lobby { 
-            display: flex; flex-direction: row; align-items: center; 
-            justify-content: space-evenly; padding: 0 20px; 
-        }
-
-        .grade-pill { 
-            background: white; padding: 35px 10px; border-radius: 30px; 
-            cursor: pointer; transition: 0.25s; width: 15%; text-align: center;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.05); border: 4px solid transparent;
-        }
-        .grade-pill:hover { transform: translateY(-8px); border-color: var(--p); }
-        .grade-pill h2 { font-size: 1.5rem; margin: 0; color: var(--p); font-weight: 700; }
+        #lobby { display: flex; flex-direction: row; align-items: center; justify-content: space-evenly; padding: 0 20px; }
+        .grade-pill { background: white; padding: 40px 10px; border-radius: 35px; cursor: pointer; transition: 0.3s; width: 14%; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .grade-pill:hover { transform: translateY(-10px); border: 4px solid var(--p); }
+        .grade-pill h2 { font-size: 1.8rem; margin: 0; color: var(--p); font-weight: 700; }
 
         .navbar { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
-        .grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; padding: 20px; overflow-y: auto; }
-        .seat { background: white; border-radius: 15px; padding: 20px; text-align: center; cursor: pointer; border: 2px solid #eee; font-weight: 700; color: #444; }
+        .grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; padding: 25px; overflow-y: auto; }
+        .seat { background: white; border-radius: 20px; padding: 25px 15px; text-align: center; cursor: pointer; border: 2px solid #eee; transition: 0.2s; font-weight: 700; font-size: 1.2rem; color: #444; position: relative; }
         .seat.done { background: var(--s); color: white; border-color: var(--s); }
+        .seat.done::after { content: '✓'; position: absolute; top: 5px; right: 10px; font-size: 0.8rem; }
 
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; align-items: center; justify-content: center; }
-        .modal-c { background: white; width: 90%; max-width: 450px; padding: 30px; border-radius: 40px; text-align: center; }
-        .input-f { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #eee; font-size: 1rem; margin: 6px 0; outline: none; font-family: inherit; }
-        .btn { width: 100%; padding: 16px; border-radius: 18px; border: none; font-size: 1.5rem; font-weight: 700; color: white; cursor: pointer; margin-top: 10px; }
+        .modal-c { background: white; width: 90%; max-width: 500px; padding: 35px; border-radius: 45px; text-align: center; }
+        .input-f { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #eee; font-size: 1rem; margin: 6px 0; outline: none; font-family: inherit; }
+        .btn { width: 100%; padding: 18px; border-radius: 22px; border: none; font-size: 1.6rem; font-weight: 700; color: white; cursor: pointer; margin-top: 10px; }
         
         .mode-row { display: flex; gap: 8px; margin-top: 5px; }
         .mode-btn { flex: 1; padding: 12px; border-radius: 12px; border: 2px solid #eee; background: white; cursor: pointer; font-weight: 700; }
         .mode-btn.active { background: var(--p); color: white; border-color: var(--p); }
 
-        .rec-pulse { position: absolute; inset: 0; border: 8px solid var(--e); border-radius: 40px; animation: pulse 1.5s infinite; display: none; pointer-events: none; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+        .rec-pulse { position: absolute; inset: 0; border: 8px solid var(--e); border-radius: 45px; animation: pulse 1.5s infinite; display: none; pointer-events: none; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
@@ -79,50 +57,52 @@
 
 <div id="main" class="view">
     <div class="navbar">
-        <button onclick="location.reload()" style="border:none; background:none; cursor:pointer;"><i data-lucide="chevron-left" size="30"></i></button>
-        <h2 id="classLabel" style="color:var(--p); margin:0;"></h2>
-        <button onclick="clearCache()" style="border:none; background:none; color:var(--e); cursor:pointer; font-weight:700; font-size:0.8rem;">reset checks</button>
+        <button onclick="location.reload()" style="border:none; background:none; cursor:pointer;"><i data-lucide="chevron-left" size="32"></i></button>
+        <div style="display:flex; gap:15px; align-items:center;">
+            <h2 id="classLabel" style="color:var(--p); margin:0;"></h2>
+            <select id="classSel" style="padding:10px; border-radius:10px;"></select>
+        </div>
+        <button onclick="clearCache()" style="border:none; background:none; color:var(--e); cursor:pointer; font-weight:700;">reset</button>
     </div>
     <div class="grid" id="seatGrid"></div>
 </div>
 
 <div id="setupModal" class="modal">
     <div class="modal-c">
-        <h2 style="color:var(--p); margin:0 0 10px 0;">setup</h2>
-        <input type="text" id="driveId" class="input-f" placeholder="paste drive folder id">
-        <div style="text-align:left; font-size:0.8rem; font-weight:700; color:var(--p);">student names (excel)</div>
+        <h2 style="color:var(--p); margin:0 0 15px 0;">class setup</h2>
+        <input type="text" id="driveId" class="input-f" placeholder="drive folder id">
+        <div style="text-align:left; font-size:0.8rem; font-weight:700; color:var(--p);">students (excel)</div>
         <input type="file" id="excelNames" class="input-f" accept=".xlsx">
-        <div style="text-align:left; font-size:0.8rem; font-weight:700; color:var(--p);">reading material (txt/excel)</div>
+        <div style="text-align:left; font-size:0.8rem; font-weight:700; color:var(--p);">sentences (txt/excel)</div>
         <input type="file" id="wordFile" class="input-f" accept=".txt,.xlsx">
         <div class="mode-row">
-            <button id="modeAll" class="mode-btn active" onclick="setMode('all')">read all</button>
-            <button id="modeLimit" class="mode-btn" onclick="setMode('limit')">random limit</button>
+            <button id="modeAll" class="mode-btn active" onclick="setMode('all')">all</button>
+            <button id="modeLimit" class="mode-btn" onclick="setMode('limit')">limit</button>
         </div>
         <input type="number" id="limitCount" class="input-f" style="display:none;" placeholder="how many items per student?">
-        <button class="btn" style="background:var(--p)" onclick="processSetup()">launch ✓</button>
+        <button class="btn" style="background:var(--p)" onclick="processSetup()">launch studio ✓</button>
     </div>
 </div>
 
 <div id="recModal" class="modal">
-    <div class="modal-c" style="position:relative; max-width: 600px;">
+    <div class="modal-c" style="position:relative; max-width: 700px;">
         <div class="rec-pulse" id="pulseEl"></div>
-        <h2 id="sName" style="opacity:0.3; margin:0; font-size: 1.1rem;"></h2>
-        <div id="wordBox" style="font-size: 2.2rem; font-weight:700; margin: 30px 0; color: #333;"></div>
-        <button id="startBtn" class="btn" style="background:var(--s);" onclick="runStart()">START</button>
+        <h2 id="sName" style="opacity:0.3; margin:0;">seat</h2>
+        <div id="wordBox" style="font-size: 2.8rem; font-weight:700; margin: 30px 0; color:#333;">ready?</div>
+        <button id="startBtn" class="btn" style="background:var(--s);" onclick="runStart()">START RECORDING</button>
         <button id="stopBtn" class="btn" style="background:var(--e); display:none;" onclick="runStop()">STOP & UPLOAD</button>
-        <div id="statusTxt" style="font-size:1.1rem; font-weight:700; color:var(--p); margin-top:15px;"></div>
-        <button onclick="closeRec()" style="margin-top:10px; border:none; background:none; color:#bbb; cursor:pointer;">cancel</button>
+        <div id="statusTxt" style="font-size:1.2rem; font-weight:700; color:var(--p); margin-top:15px;"></div>
+        <button onclick="closeRec()" id="cancelBtn" style="margin-top:15px; border:none; background:none; color:#bbb; cursor:pointer;">cancel</button>
     </div>
 </div>
 
 <script>
-    // PASTE YOUR GOOGLE APPS SCRIPT URL HERE
-    const webAppURL = 'YOUR_APPS_SCRIPT_URL';
-    const sfxDing = new Audio('ding.mp3');
+    const webAppURL = 'https://script.google.com/macros/s/AKfycbwwq6P2mA46zGXVobJmcnpNRkFRzHRcyAhqY9aowwdjoQHkfMop203cHHt0Dzlq1U43/exec';
+    const ding = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     let activeG, activeStu, activeStuEl, recorder, chunks = [], stream, mode = 'all', studentList = [], masterWords = [];
 
     window.onload = () => {
-        const saved = localStorage.getItem('wynn_drive_id');
+        const saved = localStorage.getItem('wynn_drive');
         if (saved) document.getElementById('driveId').value = saved;
         lucide.createIcons();
     };
@@ -137,15 +117,15 @@
     function openSetup(g) { activeG = g; document.getElementById('setupModal').style.display = 'flex'; }
 
     async function processSetup() {
-        const dId = document.getElementById('driveId').value;
-        if(!dId) return alert("Enter Folder ID first!");
-        localStorage.setItem('wynn_drive_id', dId);
+        const driveId = document.getElementById('driveId').value;
+        if(!driveId) return alert("Enter Folder ID!");
+        localStorage.setItem('wynn_drive', driveId);
         
         const wFile = document.getElementById('wordFile').files[0];
         if (wFile) {
             if (wFile.name.endsWith('.xlsx')) {
-                const data = await wFile.arrayBuffer();
-                masterWords = XLSX.utils.sheet_to_json(XLSX.read(data).Sheets[XLSX.read(data).SheetNames[0]], {header:1}).flat().filter(c => c);
+                const d = await wFile.arrayBuffer();
+                masterWords = XLSX.utils.sheet_to_json(XLSX.read(d).Sheets[XLSX.read(d).SheetNames[0]], {header:1}).flat().filter(c => c);
             } else {
                 masterWords = (await wFile.text()).split('\n').map(s => s.trim()).filter(s => s.length > 0);
             }
@@ -153,11 +133,20 @@
 
         const nFile = document.getElementById('excelNames').files[0];
         if (nFile) {
-            const data = await nFile.arrayBuffer();
-            studentList = XLSX.utils.sheet_to_json(XLSX.read(data).Sheets[XLSX.read(data).SheetNames[0]], {header:1}).flat().filter(n => n);
+            const d = await nFile.arrayBuffer();
+            studentList = XLSX.utils.sheet_to_json(XLSX.read(d).Sheets[XLSX.read(d).SheetNames[0]], {header:1}).flat().filter(n => n);
         } else {
-            studentList = Array.from({length: 21}, (_, i) => i + 1);
+            studentList = Array.from({length: 30}, (_, i) => i + 1);
         }
+
+        const sel = document.getElementById('classSel');
+        sel.innerHTML = '';
+        [1,2,3,4,5].forEach(i => {
+            let v = activeG + "0" + i;
+            let o = document.createElement('option'); o.value = v; o.innerText = v;
+            sel.appendChild(o);
+        });
+
         renderGrid();
     }
 
@@ -167,7 +156,7 @@
         document.getElementById('main').style.display = 'flex';
         document.getElementById('classLabel').innerText = `grade ${activeG}`;
         
-        const key = `wynn_done_g${activeG}`;
+        const key = `wynn_done_g${activeG}_${document.getElementById('classSel').value}`;
         const doneList = JSON.parse(localStorage.getItem(key) || "[]");
         const grid = document.getElementById('seatGrid');
         grid.innerHTML = '';
@@ -182,13 +171,13 @@
 
     function openRec(name, el) {
         activeStu = name; activeStuEl = el;
-        document.getElementById('sName').innerText = `recording student: ${name}`;
+        document.getElementById('sName').innerText = `student: ${name}`;
         let words = [...masterWords];
         if (mode === 'limit') {
             const count = parseInt(document.getElementById('limitCount').value) || 5;
             words = words.sort(() => 0.5 - Math.random()).slice(0, count);
         }
-        document.getElementById('wordBox').innerText = words.length ? words.join(" • ") : "ready to read";
+        document.getElementById('wordBox').innerText = words.length ? words.join(" • ") : "ready?";
         document.getElementById('recModal').style.display = 'flex';
     }
 
@@ -202,7 +191,8 @@
         document.getElementById('startBtn').style.display = 'none';
         document.getElementById('stopBtn').style.display = 'block';
         document.getElementById('pulseEl').style.display = 'block';
-        document.getElementById('statusTxt').innerText = "REC ON";
+        document.getElementById('statusTxt').innerText = "RECORDING...";
+        document.getElementById('cancelBtn').style.visibility = 'hidden';
     }
 
     function runStop() {
@@ -210,7 +200,7 @@
         stream.getTracks().forEach(t => t.stop());
         document.getElementById('stopBtn').style.display = 'none';
         document.getElementById('pulseEl').style.display = 'none';
-        document.getElementById('statusTxt').innerText = "sending to drive...";
+        document.getElementById('statusTxt').innerText = "SAVING...";
     }
 
     function upload() {
@@ -219,31 +209,33 @@
         reader.onloadend = () => {
             const params = new URLSearchParams();
             params.append('audio', reader.result.split(',')[1]);
-            params.append('filename', `${activeStu}.webm`);
-            params.append('className', `grade ${activeG}`); // This creates the sub-folder
-            params.append('folderId', localStorage.getItem('wynn_drive_id'));
+            params.append('filename', `Seat${activeStu}.webm`);
+            params.append('className', document.getElementById('classSel').value);
+            params.append('folderId', localStorage.getItem('wynn_drive'));
             
             fetch(webAppURL, { method: 'POST', body: params.toString(), mode: 'no-cors' })
             .then(() => {
-                sfxDing.play().catch(()=>{});
-                const key = `wynn_done_g${activeG}`;
+                ding.play();
+                const key = `wynn_done_g${activeG}_${document.getElementById('classSel').value}`;
                 let list = JSON.parse(localStorage.getItem(key) || "[]");
                 if(!list.includes(String(activeStu))) list.push(String(activeStu));
                 localStorage.setItem(key, JSON.stringify(list));
                 activeStuEl.classList.add('done');
+                activeStuEl.innerText = "✓";
                 closeRec();
             });
         };
     }
 
     function clearCache() {
-        if(confirm("Clear checks for this class?")) {
-            localStorage.removeItem(`wynn_done_g${activeG}`);
+        if(confirm("Reset checks for this class?")) {
+            const key = `wynn_done_g${activeG}_${document.getElementById('classSel').value}`;
+            localStorage.removeItem(key);
             renderGrid();
         }
     }
 
-    function closeRec() { document.getElementById('recModal').style.display = 'none'; document.getElementById('startBtn').style.display = 'block'; document.getElementById('stopBtn').style.display = 'none'; document.getElementById('statusTxt').innerText = ""; }
+    function closeRec() { document.getElementById('recModal').style.display = 'none'; document.getElementById('startBtn').style.display = 'block'; document.getElementById('stopBtn').style.display = 'none'; document.getElementById('statusTxt').innerText = ""; document.getElementById('cancelBtn').style.visibility = 'visible';}
 
     function toggleFS() {
         if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); document.getElementById('fsIcon').setAttribute('data-lucide', 'minimize'); } 
