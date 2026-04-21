@@ -3,79 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wynn Studio</title>
+    <title>Wynn Studio | Persistent</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        :root { 
-            --p: #6c5ce7; --s: #00b894; --e: #ff7675; 
-            --glass: rgba(255, 255, 255, 0.85);
-        }
-        
+        :root { --p: #6c5ce7; --s: #00b894; --e: #ff7675; --glass: rgba(255, 255, 255, 0.9); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Fredoka', Arial, sans-serif; margin: 0; text-transform: lowercase; overflow: hidden; height: 100vh; background: #1a1a1a url('bg.jpg') center/cover no-repeat fixed; }
+
+        .fs-toggle { position: fixed; top: 20px; right: 20px; background: var(--glass); border: none; width: 55px; height: 55px; border-radius: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2000; color: var(--p); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
         
-        body { 
-            font-family: 'Fredoka', Arial, sans-serif; /* Removed cursive */
-            margin: 0; text-transform: lowercase; overflow: hidden; height: 100vh;
-            background: #1a1a1a url('bg.jpg') center/cover no-repeat fixed;
-        }
+        .view { width: 96%; height: 80vh; background: var(--glass); backdrop-filter: blur(25px); border-radius: 50px; display: none; flex-direction: column; margin: 10vh auto; box-shadow: 0 40px 100px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.4); }
 
-        /* Fullscreen Toggle Button */
-        .fs-toggle {
-            position: fixed; top: 20px; right: 20px; 
-            background: var(--glass); border: none; width: 60px; height: 60px;
-            border-radius: 15px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 2000; color: var(--p);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
+        #lobby { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 25px; padding: 0 50px; overflow-x: auto; }
+        #lobby::-webkit-scrollbar { display: none; }
+        .grade-pill { flex: 0 0 auto; background: white; padding: 50px 40px; border-radius: 40px; cursor: pointer; transition: 0.3s; min-width: 220px; text-align: center; }
+        .grade-pill:hover { transform: translateY(-10px); border: 4px solid var(--p); }
+        .grade-pill h2 { font-size: 2.2rem; margin: 0; color: var(--p); font-weight: 700; }
 
-        .view { 
-            width: 94%; height: 85vh; background: var(--glass); 
-            backdrop-filter: blur(20px); border-radius: 40px; 
-            display: none; flex-direction: column; margin: 7vh auto;
-            border: 1px solid rgba(255,255,255,0.4);
-        }
-
-        /* LOBBY - Grade Pills only */
-        #lobby { display: flex; align-items: center; justify-content: center; gap: 40px; }
-        .grade-pill { 
-            background: white; padding: 70px 90px; border-radius: 45px; 
-            cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            border: 5px solid transparent; box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        }
-        .grade-pill:hover { transform: scale(1.1); border-color: var(--p); }
-        .grade-pill h2 { font-size: 5rem; margin: 0; color: var(--p); font-weight: 700; }
-
-        /* GRID VIEW */
         .navbar { padding: 25px 45px; display: flex; justify-content: space-between; align-items: center; }
-        .grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 18px; padding: 30px; overflow-y: auto; }
-        .seat { 
-            background: white; border-radius: 25px; border: 2px solid #eee;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            padding: 25px; cursor: pointer; transition: 0.2s;
-        }
-        .seat .n-name { font-size: 1.3rem; font-weight: 700; color: #333; text-align: center; }
-        .seat .n-num { font-size: 0.9rem; color: #bbb; margin-bottom: 5px; }
-        .seat.done { background: var(--s); border-color: var(--s); transform: scale(0.95); opacity: 0.8; }
-        .seat.done * { color: white; }
+        .grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; padding: 30px; overflow-y: auto; }
+        .seat { background: white; border-radius: 20px; padding: 25px 15px; text-align: center; cursor: pointer; border: 2px solid #eee; transition: 0.2s; font-weight: 700; font-size: 1.2rem; color: #444; position: relative; }
+        .seat.done { background: var(--s); color: white; border-color: var(--s); }
+        .seat.done::after { content: '✓'; position: absolute; top: 5px; right: 10px; font-size: 0.8rem; }
 
-        /* MODAL SYSTEM */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; }
-        .modal-c { background: white; width: 90%; max-width: 800px; padding: 50px; border-radius: 50px; text-align: center; position: relative; }
-        .rec-pulse { position: absolute; inset: 0; border: 10px solid var(--e); border-radius: 50px; animation: pulse 1.5s infinite; display: none; pointer-events: none; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
-
-        /* BUTTONS & INPUTS */
-        .btn { width: 100%; padding: 25px; border-radius: 30px; border: none; font-size: 2rem; font-weight: 700; color: white; cursor: pointer; margin-top: 15px; }
-        .form-g { margin-bottom: 20px; text-align: left; }
-        .form-g label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--p); font-size: 1.1rem; }
-        .input-f { width: 100%; padding: 18px; border-radius: 18px; border: 2px solid #eee; font-size: 1.2rem; font-family: inherit; outline: none; }
+        .modal-c { background: white; width: 90%; max-width: 550px; padding: 40px; border-radius: 50px; text-align: center; }
+        .input-f { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid #eee; font-size: 1rem; margin: 8px 0; outline: none; font-family: inherit; }
+        .btn { width: 100%; padding: 20px; border-radius: 25px; border: none; font-size: 1.8rem; font-weight: 700; color: white; cursor: pointer; margin-top: 15px; }
         
-        .mode-row { display: flex; gap: 12px; }
-        .mode-btn { flex: 1; padding: 18px; border-radius: 18px; border: 2px solid #eee; background: white; cursor: pointer; font-weight: 700; }
-        .mode-btn.active { background: var(--p); color: white; border-color: var(--p); }
+        .mode-row { display: flex; gap: 10px; margin-top: 5px; }
+        .mode-btn { flex: 1; padding: 15px; border-radius: 15px; border: 2px solid #eee; background: white; cursor: pointer; font-weight: 700; }
+        .mode-btn.active { background: var(--p); color: white; }
+
+        .rec-pulse { position: absolute; inset: 0; border: 10px solid var(--e); border-radius: 50px; animation: pulse 1.5s infinite; display: none; pointer-events: none; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
     </style>
 </head>
 <body>
@@ -83,104 +47,119 @@
 <button class="fs-toggle" onclick="toggleFS()"><i data-lucide="maximize" id="fsIcon"></i></button>
 
 <div id="lobby" class="view" style="display: flex;">
-    <div class="grade-pill" onclick="openSetup(1)"><h2>g1</h2></div>
-    <div class="grade-pill" onclick="openSetup(2)"><h2>g2</h2></div>
-    <div class="grade-pill" onclick="openSetup(3)"><h2>g3</h2></div>
-    <div class="grade-pill" onclick="openSetup(4)"><h2>g4</h2></div>
-    <div class="grade-pill" onclick="openSetup(5)"><h2>g5</h2></div>
-    <div class="grade-pill" onclick="openSetup(6)"><h2>g6</h2></div>
+    <div class="grade-pill" onclick="openSetup(1)"><h2>grade 1</h2></div>
+    <div class="grade-pill" onclick="openSetup(2)"><h2>grade 2</h2></div>
+    <div class="grade-pill" onclick="openSetup(3)"><h2>grade 3</h2></div>
+    <div class="grade-pill" onclick="openSetup(4)"><h2>grade 4</h2></div>
+    <div class="grade-pill" onclick="openSetup(5)"><h2>grade 5</h2></div>
+    <div class="grade-pill" onclick="openSetup(6)"><h2>grade 6</h2></div>
 </div>
 
 <div id="main" class="view">
     <div class="navbar">
-        <button onclick="location.reload()" style="border:none; background:none; cursor:pointer;"><i data-lucide="arrow-left-circle" size="40"></i></button>
-        <h2 id="classLabel" style="color:var(--p); margin:0; font-size: 2rem;"></h2>
-        <div style="width:40px;"></div>
+        <button onclick="location.reload()" style="border:none; background:none; cursor:pointer;"><i data-lucide="chevron-left" size="40"></i></button>
+        <h2 id="classLabel" style="color:var(--p); margin:0;"></h2>
+        <button onclick="clearClassCache()" style="border:none; background:none; color:var(--e); cursor:pointer; font-size:0.8rem; font-weight:700;">reset class</button>
     </div>
     <div class="grid" id="seatGrid"></div>
 </div>
 
 <div id="setupModal" class="modal">
-    <div class="modal-c" style="max-width: 550px;">
-        <h2 style="color:var(--p); margin-top:0;">Class Configuration</h2>
-        <div class="form-g"><label>Drive Folder ID</label><input type="text" id="driveId" class="input-f" placeholder="Enter ID string"></div>
-        <div class="form-g"><label>Number of Students</label><input type="number" id="stuCount" class="input-f" value="21"></div>
-        <div class="form-g"><label>Student List (Excel)</label><input type="file" id="excelFile" class="input-f" accept=".xlsx"></div>
-        <div class="form-g">
-            <label>Recording Mode</label>
+    <div class="modal-c">
+        <h2 style="color:var(--p); margin-top:0;">setup class</h2>
+        <input type="text" id="driveId" class="input-f" placeholder="drive folder id">
+        
+        <div style="text-align:left; font-size:0.9rem; color:var(--p); font-weight:700; margin-top:10px;">names (excel):</div>
+        <input type="file" id="excelNames" class="input-f" accept=".xlsx">
+        
+        <div style="text-align:left; font-size:0.9rem; color:var(--p); font-weight:700; margin-top:10px;">words (txt/excel):</div>
+        <input type="file" id="wordFile" class="input-f" accept=".txt,.xlsx">
+        
+        <div style="text-align:left; margin-top:15px;">
             <div class="mode-row">
-                <button id="modeAll" class="mode-btn active" onclick="setMode('all')">Read All</button>
-                <button id="modeLimit" class="mode-btn" onclick="setMode('limit')">Limit Random 5</button>
+                <button id="modeAll" class="mode-btn active" onclick="setMode('all')">read all</button>
+                <button id="modeLimit" class="mode-btn" onclick="setMode('limit')">random limit</button>
             </div>
+            <input type="number" id="limitCount" class="input-f" style="display:none;" placeholder="how many words per student?">
         </div>
-        <button class="btn" style="background:var(--p)" onclick="startStudio()">Launch ✓</button>
+        <button class="btn" style="background:var(--p)" onclick="processSetup()">start studio ✓</button>
     </div>
 </div>
 
 <div id="recModal" class="modal">
-    <div class="modal-c">
+    <div class="modal-c" style="position:relative; max-width: 800px;">
         <div class="rec-pulse" id="pulseEl"></div>
-        <h2 id="sName" style="opacity:0.4; margin:0; font-size: 1.5rem;"></h2>
-        <div id="wordBox" style="font-size: 4.5rem; font-weight:700; margin: 40px 0; line-height: 1.2;">ready?</div>
+        <h2 id="sName" style="opacity:0.4; margin:0;"></h2>
+        <div id="wordBox" style="font-size: 3rem; font-weight:700; margin: 40px 0; line-height:1.2;"></div>
         <button id="startBtn" class="btn" style="background:var(--s);" onclick="runStart()">START</button>
-        <button id="stopBtn" class="btn" style="background:var(--e); display:none;" onclick="runStop()">STOP & UPLOAD</button>
-        <div id="statusTxt" style="font-size:1.6rem; font-weight:700; color:var(--p); margin-top:20px;"></div>
-        <button id="closeBtn" onclick="closeRec()" style="margin-top:20px; background:none; border:none; color:#bbb; cursor:pointer; font-weight:700;">CANCEL</button>
+        <button id="stopBtn" class="btn" style="background:var(--e); display:none;" onclick="runStop()">STOP & SAVE</button>
+        <div id="statusTxt" style="font-size:1.5rem; font-weight:700; color:var(--p); margin-top:20px;"></div>
+        <button onclick="closeRec()" style="margin-top:20px; background:none; border:none; color:#bbb; cursor:pointer;">cancel</button>
     </div>
 </div>
 
 <script>
-    const webAppURL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
+    const webAppURL = 'YOUR_APPS_SCRIPT_URL';
     const sfxDing = new Audio('ding.mp3');
-    const sfxClick = new Audio('click.mp3');
-    
     let activeG, activeStu, activeStuEl, recorder, chunks = [], stream;
-    let mode = 'all', studentList = [];
-    
-    // Example word bank
-    const library = { 1:["Cat","Hat"], 2:["Green","Bean"], 3:["Sentence A","Sentence B"], 4:[], 5:[], 6:[] };
+    let mode = 'all', studentList = [], masterWords = [];
 
-    lucide.createIcons();
+    // Load Drive ID from cache on boot
+    window.onload = () => {
+        const savedDrive = localStorage.getItem('wynn_drive_id');
+        if (savedDrive) document.getElementById('driveId').value = savedDrive;
+        lucide.createIcons();
+    };
 
     function setMode(m) {
         mode = m;
         document.getElementById('modeAll').classList.toggle('active', m==='all');
         document.getElementById('modeLimit').classList.toggle('active', m==='limit');
+        document.getElementById('limitCount').style.display = (m === 'limit') ? 'block' : 'none';
     }
 
     function openSetup(g) { activeG = g; document.getElementById('setupModal').style.display = 'flex'; }
 
-    function startStudio() {
-        const file = document.getElementById('excelFile').files[0];
-        const count = document.getElementById('stuCount').value || 21;
+    async function processSetup() {
+        const driveId = document.getElementById('driveId').value;
+        localStorage.setItem('wynn_drive_id', driveId); // Cache Folder ID
 
-        if (file) {
-            const r = new FileReader();
-            r.onload = (e) => {
-                const data = new Uint8Array(e.target.result);
-                const rows = XLSX.utils.sheet_to_json(XLSX.read(data, {type: 'array'}).Sheets[XLSX.read(data, {type: 'array'}).SheetNames[0]], {header:1});
-                studentList = rows.flat().filter(n => n);
-                render();
-            };
-            r.readAsArrayBuffer(file);
-        } else {
-            studentList = Array.from({length: count}, (_, i) => `Student ${i+1}`);
-            render();
+        const wordFile = document.getElementById('wordFile').files[0];
+        if (wordFile) {
+            if (wordFile.name.endsWith('.xlsx')) {
+                const data = await wordFile.arrayBuffer();
+                masterWords = XLSX.utils.sheet_to_json(XLSX.read(data).Sheets[XLSX.read(data).SheetNames[0]], {header:1}).flat().filter(c => c);
+            } else {
+                masterWords = (await wordFile.text()).split('\n').map(s => s.trim()).filter(s => s.length > 0);
+            }
         }
+
+        const nameFile = document.getElementById('excelNames').files[0];
+        if (nameFile) {
+            const data = await nameFile.arrayBuffer();
+            studentList = XLSX.utils.sheet_to_json(XLSX.read(data).Sheets[XLSX.read(data).SheetNames[0]], {header:1}).flat().filter(n => n);
+        } else {
+            studentList = Array.from({length: 21}, (_, i) => i + 1);
+        }
+        renderGrid();
     }
 
-    function render() {
+    function renderGrid() {
         document.getElementById('setupModal').style.display = 'none';
         document.getElementById('lobby').style.display = 'none';
         document.getElementById('main').style.display = 'flex';
-        document.getElementById('classLabel').innerText = `Grade ${activeG}`;
+        document.getElementById('classLabel').innerText = `grade ${activeG}`;
+        
+        const cacheKey = `wynn_done_g${activeG}_${localStorage.getItem('wynn_drive_id')}`;
+        const doneList = JSON.parse(localStorage.getItem(cacheKey) || "[]");
 
         const grid = document.getElementById('seatGrid');
         grid.innerHTML = '';
-        studentList.forEach((name, i) => {
+        studentList.forEach((name) => {
             const div = document.createElement('div');
             div.className = 'seat';
-            div.innerHTML = `<span class="n-num">#${i+1}</span><span class="n-name">${name}</span>`;
+            div.innerText = name;
+            if (doneList.includes(String(name))) div.classList.add('done');
             div.onclick = () => openRec(name, div);
             grid.appendChild(div);
         });
@@ -188,12 +167,13 @@
 
     function openRec(name, el) {
         activeStu = name; activeStuEl = el;
-        document.getElementById('sName').innerText = name;
-        
-        let bank = library[activeG] || ["Reading Practice"];
-        if(mode === 'limit') bank = [...bank].sort(() => 0.5 - Math.random()).slice(0, 5);
-        document.getElementById('wordBox').innerText = bank.join(" • ");
-        
+        document.getElementById('sName').innerText = `student: ${name}`;
+        let displayWords = [...masterWords];
+        if (mode === 'limit') {
+            const count = parseInt(document.getElementById('limitCount').value) || 5;
+            displayWords = displayWords.sort(() => 0.5 - Math.random()).slice(0, count);
+        }
+        document.getElementById('wordBox').innerText = displayWords.length ? displayWords.join(" • ") : "no words loaded";
         document.getElementById('recModal').style.display = 'flex';
     }
 
@@ -204,11 +184,10 @@
         recorder.ondataavailable = e => chunks.push(e.data);
         recorder.onstop = upload;
         recorder.start();
-
         document.getElementById('startBtn').style.display = 'none';
         document.getElementById('stopBtn').style.display = 'block';
         document.getElementById('pulseEl').style.display = 'block';
-        document.getElementById('statusTxt').innerText = "RECORDING...";
+        document.getElementById('statusTxt').innerText = "recording...";
     }
 
     function runStop() {
@@ -216,7 +195,7 @@
         stream.getTracks().forEach(t => t.stop());
         document.getElementById('stopBtn').style.display = 'none';
         document.getElementById('pulseEl').style.display = 'none';
-        document.getElementById('statusTxt').innerText = "UPLOADING...";
+        document.getElementById('statusTxt').innerText = "uploading...";
     }
 
     function upload() {
@@ -225,34 +204,39 @@
         reader.onloadend = () => {
             const params = new URLSearchParams();
             params.append('audio', reader.result.split(',')[1]);
-            params.append('filename', `${activeStu}_G${activeG}.webm`);
-            params.append('folderId', document.getElementById('driveId').value);
-
+            params.append('filename', `${activeStu}_g${activeG}.webm`);
+            params.append('folderId', localStorage.getItem('wynn_drive_id'));
+            
             fetch(webAppURL, { method: 'POST', body: params.toString(), mode: 'no-cors' })
             .then(() => {
-                sfxDing.play();
+                sfxDing.play().catch(()=>{});
+                markAsDone(activeStu);
                 activeStuEl.classList.add('done');
                 closeRec();
             });
         };
     }
 
-    function closeRec() {
-        document.getElementById('recModal').style.display = 'none';
-        document.getElementById('startBtn').style.display = 'block';
-        document.getElementById('stopBtn').style.display = 'none';
-        document.getElementById('statusTxt').innerText = "";
+    function markAsDone(name) {
+        const cacheKey = `wynn_done_g${activeG}_${localStorage.getItem('wynn_drive_id')}`;
+        let doneList = JSON.parse(localStorage.getItem(cacheKey) || "[]");
+        if (!doneList.includes(String(name))) doneList.push(String(name));
+        localStorage.setItem(cacheKey, JSON.stringify(doneList));
     }
 
-    function toggleFS() {
-        const icon = document.getElementById('fsIcon');
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            icon.setAttribute('data-lucide', 'minimize');
-        } else {
-            if (document.exitFullscreen) document.exitFullscreen();
-            icon.setAttribute('data-lucide', 'maximize');
+    function clearClassCache() {
+        if(confirm("Clear all 'Done' checkmarks for this class?")) {
+            const cacheKey = `wynn_done_g${activeG}_${localStorage.getItem('wynn_drive_id')}`;
+            localStorage.removeItem(cacheKey);
+            renderGrid();
         }
+    }
+
+    function closeRec() { document.getElementById('recModal').style.display = 'none'; document.getElementById('startBtn').style.display = 'block'; document.getElementById('stopBtn').style.display = 'none'; document.getElementById('statusTxt').innerText = ""; }
+
+    function toggleFS() {
+        if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); document.getElementById('fsIcon').setAttribute('data-lucide', 'minimize'); } 
+        else { document.exitFullscreen(); document.getElementById('fsIcon').setAttribute('data-lucide', 'maximize'); }
         lucide.createIcons();
     }
 </script>
