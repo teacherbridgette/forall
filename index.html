@@ -8,12 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        :root { 
-            --p: #6c5ce7; 
-            --s: #00b894; 
-            --e: #ff7675; 
-        }
-        
+        :root { --p: #6c5ce7; --s: #00b894; --e: #ff7675; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
@@ -23,110 +18,52 @@
             background-size: cover;
         }
 
-        /* Fullscreen Toggle Button */
         .fs-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.8);
-            border: none;
-            width: 60px;
-            height: 60px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 2000;
-            color: var(--p);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: 0.2s;
-        }
-        .fs-toggle:hover { background: white; transform: scale(1.1); }
-
-        .app-shell {
-            width: 100vw; 
-            height: 100vh;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            background: transparent; 
+            position: fixed; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.8);
+            border: none; width: 60px; height: 60px; border-radius: 15px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 2000; color: var(--p); box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
-        .grade-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-            width: 90%;
-            max-width: 1200px;
-        }
+        .app-shell { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+        .grade-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; width: 90%; max-width: 1200px; }
 
         .grade-pill {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 60px 10px;
-            border-radius: 45px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 6px solid transparent;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.95); padding: 60px 10px; border-radius: 45px;
+            text-align: center; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 6px solid transparent; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
-
-        .grade-pill:hover {
-            transform: scale(1.08) translateY(-10px);
-            border-color: var(--p);
-        }
-
-        .grade-pill h2 { 
-            font-size: 3.5rem;
-            margin: 0; 
-            color: var(--p); 
-            font-weight: 700;
-        }
+        .grade-pill:hover { transform: scale(1.08) translateY(-10px); border-color: var(--p); }
+        .grade-pill h2 { font-size: 3.5rem; margin: 0; color: var(--p); font-weight: 700; }
 
         /* Modals */
         .modal-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6); 
-            z-index: 1000;
-            align-items: center; justify-content: center;
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); 
+            z-index: 1000; align-items: center; justify-content: center;
         }
-
         .modal-box {
-            background: white; width: 90%; max-width: 650px;
-            padding: 60px 40px; border-radius: 50px; text-align: center;
-            position: relative;
-            box-shadow: 0 30px 100px rgba(0,0,0,0.5);
+            background: white; width: 90%; max-width: 650px; padding: 40px; border-radius: 50px;
+            text-align: center; position: relative; box-shadow: 0 30px 100px rgba(0,0,0,0.5);
             animation: popIn 0.3s ease-out;
         }
-
         @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        .close-btn {
-            position: absolute; top: 25px; right: 25px;
-            background: #f1f2f6; border: none; width: 50px; height: 50px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: #a4b0be;
-        }
+        .close-btn { position: absolute; top: 25px; right: 25px; background: #f1f2f6; border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-        .input-large {
-            width: 100%; padding: 25px; border-radius: 25px;
-            border: 3px solid #f1f2f6; font-size: 2rem; text-align: center;
-            margin: 20px 0; font-family: inherit; outline: none;
-        }
+        .input-large { width: 100%; padding: 18px; border-radius: 20px; border: 3px solid #f1f2f6; font-size: 1.8rem; text-align: center; margin: 15px 0; font-family: inherit; outline: none; }
+        
+        .btn-action { width: 100%; padding: 22px; border-radius: 30px; border: none; background: var(--p); color: white; font-size: 1.8rem; font-weight: 700; cursor: pointer; margin-top: 10px; }
 
-        .btn-action {
-            width: 100%; padding: 25px; border-radius: 30px; border: none;
-            background: var(--p); color: white; font-size: 2rem;
-            font-weight: 700; cursor: pointer;
-        }
+        /* Toggle Option Styling */
+        .option-group { display: flex; gap: 10px; margin: 15px 0; }
+        .opt-btn { flex: 1; padding: 15px; border-radius: 15px; border: 2px solid #eee; background: white; cursor: pointer; font-family: inherit; font-weight: 600; transition: 0.2s; }
+        .opt-btn.active { border-color: var(--p); background: #f0edff; color: var(--p); }
     </style>
 </head>
 <body>
 
-<button class="fs-toggle" onclick="toggleFullScreen()" title="Toggle Fullscreen">
-    <i data-lucide="maximize" id="fsIcon"></i>
-</button>
+<button class="fs-toggle" onclick="toggleFullScreen()"><i data-lucide="maximize" id="fsIcon"></i></button>
 
 <div class="app-shell">
     <div class="grade-container">
@@ -139,24 +76,34 @@
     </div>
 </div>
 
-<div id="stepSections" class="modal-overlay">
+<div id="stepConfig" class="modal-overlay">
     <div class="modal-box">
         <button class="close-btn" onclick="closeAll()"><i data-lucide="x"></i></button>
-        <h1 style="color:var(--p); margin:0;">How many sections?</h1>
-        <input type="number" id="sectionCount" class="input-large" placeholder="10">
-        <button class="btn-action" onclick="confirmSections()">Next</button>
+        <h2 style="color:var(--p); margin:0;">Class Settings</h2>
+        
+        <input type="number" id="sectionCount" class="input-large" placeholder="Number of sections (e.g. 10)">
+        
+        <p style="margin: 10px 0 5px; font-weight: 600;">Reading Mode:</p>
+        <div class="option-group">
+            <button id="modeAll" class="opt-btn active" onclick="setMode('all')">Read All</button>
+            <button id="modeLimit" class="opt-btn" onclick="setMode('limit')">Limit Sentences</button>
+        </div>
+        
+        <div id="limitInput" style="display:none;">
+            <input type="number" id="sentPerStudent" class="input-large" placeholder="Sentences per student (e.g. 5)">
+        </div>
+
+        <button class="btn-action" onclick="confirmConfig()">Next</button>
     </div>
 </div>
 
 <div id="stepDrive" class="modal-overlay">
     <div class="modal-box">
         <button class="close-btn" onclick="closeAll()"><i data-lucide="x"></i></button>
-        <h1 style="color:var(--p); margin:0;">Class Setup</h1>
+        <h2 style="color:var(--p); margin:0;">Final Setup</h2>
         <input type="text" id="driveUrl" class="input-large" placeholder="Paste Drive link...">
-        <div style="margin: 20px 0;">
-            <p style="margin-bottom:10px; font-weight:600;">Upload word list</p>
-            <input type="file" id="wordFile">
-        </div>
+        <p style="margin: 10px 0; font-weight: 600;">Upload Word List</p>
+        <input type="file" id="wordFile" style="margin-bottom:20px;">
         <button class="btn-action" style="background:var(--s)" onclick="finalSave()">Start Class ✓</button>
     </div>
 </div>
@@ -165,45 +112,42 @@
     const sfxHover = new Audio('hover.mp3');
     const sfxClick = new Audio('click.mp3');
     const sfxDing = new Audio('ding.mp3');
+    let readingMode = 'all';
 
     lucide.createIcons();
 
-    function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            document.getElementById('fsIcon').setAttribute('data-lucide', 'minimize');
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-                document.getElementById('fsIcon').setAttribute('data-lucide', 'maximize');
-            }
-        }
-        lucide.createIcons(); // Refresh icons
-    }
-
-    function playHover() { 
-        sfxHover.currentTime = 0;
-        sfxHover.play().catch(() => {}); 
+    function setMode(m) {
+        readingMode = m;
+        document.getElementById('modeAll').classList.toggle('active', m === 'all');
+        document.getElementById('modeLimit').classList.toggle('active', m === 'limit');
+        document.getElementById('limitInput').style.display = (m === 'limit') ? 'block' : 'none';
+        sfxClick.play();
     }
 
     function selectGrade(g) {
         sfxClick.play();
-        document.getElementById('stepSections').style.display = 'flex';
+        document.getElementById('stepConfig').style.display = 'flex';
     }
 
-    function confirmSections() {
-        document.getElementById('stepSections').style.display = 'none';
+    function confirmConfig() {
+        document.getElementById('stepConfig').style.display = 'none';
         document.getElementById('stepDrive').style.display = 'flex';
     }
 
     function finalSave() {
         sfxDing.play();
+        alert(`Ready! Mode: ${readingMode === 'all' ? 'Read All' : document.getElementById('sentPerStudent').value + ' per student'}`);
         closeAll();
     }
 
-    function closeAll() {
-        document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+    function closeAll() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else if (document.exitFullscreen) document.exitFullscreen();
     }
+    
+    function playHover() { sfxHover.currentTime = 0; sfxHover.play().catch(()=>{}); }
 </script>
 
 </body>
