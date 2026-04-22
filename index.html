@@ -38,7 +38,7 @@
 
         #lobby { 
             display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr);
-            gap: 25px; padding: 100px 60px 60px 60px; box-sizing: border-box;
+            gap: 25px; padding: 120px 60px 60px 60px; box-sizing: border-box;
         }
 
         .grade-pill { 
@@ -80,18 +80,20 @@
             min-height: 180px; display: flex; align-items: center; justify-content: center; word-break: break-word;
         }
 
+        /* UPDATED WATERMARK STYLING */
         .watermark {
             position: fixed;
-            bottom: 10px;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.85rem;
+            font-size: 1.1rem; /* Larger font */
+            font-weight: 600;
             color: var(--p);
-            opacity: 0.5;
             text-align: center;
-            z-index: 10;
+            z-index: 100; /* Ensure it stays on top */
             width: 90%;
             pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8), -2px -2px 4px rgba(255, 255, 255, 0.8); /* High contrast */
         }
     </style>
 </head>
@@ -101,7 +103,7 @@
 
 <div class="app">
     <div id="lobby" class="view" style="display: grid;">
-        <h1 style="position:absolute; top:20px; left:50%; transform:translateX(-50%); font-size:2rem; color:var(--p); opacity:0.6; white-space: nowrap;">Teacher Wynn's Recording Studio</h1>
+        <h1 style="position:absolute; top:25px; left:50%; transform:translateX(-50%); font-size:2.8rem; color:var(--p); opacity:0.8; white-space: nowrap; font-weight:700;">Teacher Wynn's Recording Studio</h1>
         <div class="grade-pill" onclick="promptConfig(1)" onmouseover="playHover()"><h2>Grade 1</h2></div>
         <div class="grade-pill" onclick="promptConfig(2)" onmouseover="playHover()"><h2>Grade 2</h2></div>
         <div class="grade-pill" onclick="promptConfig(3)" onmouseover="playHover()"><h2>Grade 3</h2></div>
