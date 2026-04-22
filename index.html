@@ -79,6 +79,20 @@
             line-height: 1.2; color: var(--e); margin: 30px 0; font-weight: 700;
             min-height: 180px; display: flex; align-items: center; justify-content: center; word-break: break-word;
         }
+
+        .watermark {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85rem;
+            color: var(--p);
+            opacity: 0.5;
+            text-align: center;
+            z-index: 10;
+            width: 90%;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -87,7 +101,7 @@
 
 <div class="app">
     <div id="lobby" class="view" style="display: grid;">
-        <h1 style="position:absolute; top:20px; left:50%; transform:translateX(-50%); font-size:2rem; color:var(--p); opacity:0.6;">Recording Studio</h1>
+        <h1 style="position:absolute; top:20px; left:50%; transform:translateX(-50%); font-size:2rem; color:var(--p); opacity:0.6; white-space: nowrap;">Teacher Wynn's Recording Studio</h1>
         <div class="grade-pill" onclick="promptConfig(1)" onmouseover="playHover()"><h2>Grade 1</h2></div>
         <div class="grade-pill" onclick="promptConfig(2)" onmouseover="playHover()"><h2>Grade 2</h2></div>
         <div class="grade-pill" onclick="promptConfig(3)" onmouseover="playHover()"><h2>Grade 3</h2></div>
@@ -107,6 +121,10 @@
             <button onclick="promptConfig(activeG)" style="border:none; background:none; cursor:pointer; color:var(--p);"><i data-lucide="settings" size="40"></i></button>
         </div>
         <div class="grid" id="seatGrid"></div>
+    </div>
+
+    <div class="watermark">
+        This recording studio is design by Teacher Bridgette Wynn, a Filipina foreign English teacher stationed in Taichung City. Feel free to use this in your classes.
     </div>
 </div>
 
@@ -265,7 +283,6 @@
         let limit = parseInt(document.getElementById('wordLimit').value);
         let allWords = wordsData[activeG] || ["ready?"];
         
-        // FIX: Slice list for student. If limit is 0, they get all words.
         activeWordsList = (limit > 0) ? allWords.slice(0, limit) : allWords;
         currentWordIdx = 0;
         
@@ -281,7 +298,6 @@
     function updateWordView() {
         document.getElementById('wordBox').innerText = activeWordsList[currentWordIdx];
         document.getElementById('wordCounter').innerText = `Word ${currentWordIdx + 1} of ${activeWordsList.length}`;
-        // Hide next button if on last word
         document.getElementById('nextBtn').style.display = (currentWordIdx === activeWordsList.length - 1) ? 'none' : 'block';
     }
 
